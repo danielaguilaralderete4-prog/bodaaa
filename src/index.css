@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary: #5A5A40;
+    --primary-container: #EAE7DC;
+    --on-primary: #ffffff;
+    --on-primary-container: #5A5A40;
+    --surface: #FDFCF0;
+    --surface-container-lowest: #ffffff;
+    --surface-container-low: #F7F3E9;
+    --surface-container: #EAE7DC;
+    --surface-container-high: #E0D8C3;
+    --on-surface: #333333;
+    --on-surface-variant: #5A5A40;
+    --outline-variant: #E0D8C3;
+    --tertiary: #8D8741;
+    --tertiary-fixed-dim: #BC986A;
+    --secondary: #BC986A;
+  }
+}
+
+body {
+  font-family: 'DM Sans', Georgia, sans-serif;
+  background-color: #FDFCF0;
+  color: #4A4A4A;
+  scroll-behavior: smooth;
+}
+
+h1, h2, h3, .font-serif-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F7F3E9;
+}
+::-webkit-scrollbar-thumb {
+  background: #D8C3A5;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8D8741;
+}

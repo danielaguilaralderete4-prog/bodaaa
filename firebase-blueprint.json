@@ -1,0 +1,39 @@
+{
+  "entities": {
+    "guest": {
+      "title": "Guest",
+      "description": "Wedding guest invitation and RSVP details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier of the guest document" },
+        "codigo_invitacion": { "type": "string", "description": "Unique invitation code for the guest or family" },
+        "nombre_principal": { "type": "string", "description": "Full name of main invitee or family" },
+        "cupos_totales": { "type": "number", "description": "Total number of seats granted" },
+        "confirmado": { "type": "boolean", "description": "Whether RSVP response has been submitted" },
+        "cupos_confirmados": { "type": "number", "description": "Number of confirmed attendees" },
+        "asistira": { "type": "boolean", "description": "True if attending, false if declining, null if pending" },
+        "asistentes_nombres": { "type": "array", "description": "List of names of the attendees" },
+        "comentarios_dieta": { "type": "string", "description": "Dietary restrictions or allergies" },
+        "mensaje_novios": { "type": "string", "description": "Heartfelt greeting or message for the couple" },
+        "fecha_confirmacion": { "type": "string", "description": "ISO timestamp of RSVP submission" },
+        "telefono": { "type": "string", "description": "Contact phone number" },
+        "email": { "type": "string", "description": "Contact email" },
+        "mesa_asignada": { "type": "string", "description": "Assigned table number/name" },
+        "categoria": { "type": "string", "description": "Guest category: Familia, Amigos, etc." }
+      },
+      "required": ["codigo_invitacion", "nombre_principal", "cupos_totales", "confirmado"]
+    }
+  },
+  "firestore": {
+    "guests": {
+      "entity": "guest",
+      "description": "Public readable and writable wedding guest collection with live sync",
+      "securityRules": {
+        "read": "true",
+        "create": "true",
+        "update": "true",
+        "delete": "true"
+      }
+    }
+  }
+}
