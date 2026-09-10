@@ -17,7 +17,7 @@ export const WEDDING_DETAILS = {
   venueName: 'Centro eventos Matri',
   venueAddress: 'Ruta 215 7020, Osorno, Los Lagos, Chile',
   ceremonyTime: '16:00 Hrs',
-  rsvpDeadline: '12 de Noviembre, 2026',
+  rsvpDeadline: '12 de Octubre, 2026',
   googleMapsUrl: 'https://maps.app.goo.gl/h3vNFbHpCvgvdFx27',
   parisNoviosUrl: 'https://club.noviosparis.cl/home/couple-catalog/21054461',
   parisNoviosCode: '21054461',
@@ -42,14 +42,14 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
     iconName: 'church'
   },
   {
-    time: '18:30',
+    time: '18:00',
     title: 'Cóctel de Bienvenida & Fotografías',
     description: 'Espumante, aperitivos sureños y música acústica en vivo mientras cae el atardecer.',
     iconName: 'local_bar'
   },
   {
-    time: '20:00',
-    title: 'Banquete & Cena',
+    time: '19:30',
+    title: 'Cena',
     description: 'Cena de tres tiempos con maridaje especial, rodeados de nuestras familias y amigos.',
     iconName: 'restaurant'
   },
