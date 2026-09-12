@@ -13,7 +13,7 @@ export const HeroSection: React.FC = () => {
       {/* Background Image with Natural Tones Editorial Overlay */}
       <div className="absolute inset-0 w-full h-full z-0">
         <div
-          className="w-full h-full bg-cover bg-no-repeat bg-[center_42%] sm:bg-[center_38%] transition-transform duration-1000"
+          className="w-full h-full bg-cover bg-bottom bg-no-repeat transition-transform duration-1000"
           style={{
             backgroundImage: `url("${heroCouple}")`,
           }}
@@ -51,7 +51,7 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Countdown Floating Card */}
-        <div className="w-full max-w-lg mt-40 sm:mt-28 bg-[#FDFCF0]/97 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E0D8C3] shadow-[0_12px_36px_rgba(90,90,64,0.08)]">
+        <div className="w-full max-w-lg mt-72 sm:mt-28 bg-[#FDFCF0]/97 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E0D8C3] shadow-[0_12px_36px_rgba(90,90,64,0.08)]">
           <h3 className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D8741] mb-5">
             Cuenta Regresiva
           </h3>
