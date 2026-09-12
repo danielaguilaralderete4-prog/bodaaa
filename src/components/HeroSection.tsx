@@ -2,31 +2,32 @@ import React from 'react';
 import { CountdownTimer } from './CountdownTimer';
 import { WEDDING_DETAILS } from '../data/weddingInfo';
 import { Heart, Calendar, MapPin, ChevronDown } from 'lucide-react';
-import heroCouple from '../assets/images/hero-couple.jpeg';
+import heroCouple from '../assets/images/hero-new.jpeg';
 
 export const HeroSection: React.FC = () => {
   return (
     <section
       id="hero"
-      className="relative isolate min-h-[90vh] sm:min-h-[95vh] w-full flex flex-col items-center justify-center pt-20 pb-16 px-4 overflow-hidden"
+      className="relative isolate min-h-[100svh] w-full flex flex-col items-center justify-start pt-24 sm:pt-28 pb-16 px-4 overflow-hidden"
     >
       {/* Background Image with Natural Tones Editorial Overlay */}
       <div className="absolute inset-0 w-full h-full z-0">
         <div
-          className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-1000 scale-105"
+          className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-1000"
           style={{
             backgroundImage: `url("${heroCouple}")`,
+            backgroundPosition: 'center 30%',
           }}
         />
         {/* Natural Tones Soft Overlays */}
-        <div className="absolute inset-0 bg-[#FDFCF0]/30 backdrop-blur-[1px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF0]/70 via-[#FDFCF0]/10 to-[#FDFCF0]/95" />
+        <div className="absolute inset-0 bg-[#FDFCF0]/20 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF0]/90 via-[#FDFCF0]/15 to-[#FDFCF0]/95" />
       </div>
 
       {/* Main Hero Card Container */}
       <div className="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center text-center animate-fade-in">
         {/* Natural Tones Eyebrow Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDFCF0]/95 border border-[#8D8741]/40 shadow-sm mb-6 backdrop-blur-sm">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDFCF0]/95 border border-[#8D8741]/40 shadow-sm mb-4 backdrop-blur-sm">
           <Heart className="w-3.5 h-3.5 text-[#8D8741] fill-[#8D8741]" />
           <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#5A5A40]">
             Save the Date &bull; Unión en la Naturaleza
@@ -34,11 +35,11 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Couple Names */}
-        <h1 className="font-serif-display text-4xl sm:text-6xl md:text-7xl font-bold text-[#333333] tracking-tight mb-3">
+        <h1 className="font-serif-display text-4xl sm:text-6xl md:text-7xl font-bold text-[#333333] tracking-tight mb-2">
           Bárbara & Daniel
         </h1>
 
-        <p className="text-sm sm:text-base uppercase tracking-[0.2em] text-[#6B6B56] font-medium mb-6">
+        <p className="text-sm sm:text-base uppercase tracking-[0.2em] text-[#6B6B56] font-medium mb-3">
           ¡Nos casamos!
         </p>
 
@@ -46,7 +47,7 @@ export const HeroSection: React.FC = () => {
         <div className="w-20 h-[1.5px] bg-gradient-to-r from-transparent via-[#8D8741] to-transparent my-2" />
 
         {/* Date & Location Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-4 text-[#5A5A40] my-6 text-sm sm:text-base">
+        <div className="flex flex-wrap items-center justify-center gap-4 text-[#5A5A40] my-4 text-sm sm:text-base">
           <div className="flex items-center gap-1.5 font-serif-display italic text-lg sm:text-xl text-[#5A5A40]">
             <Calendar className="w-4 h-4 text-[#8D8741]" />
             <span>{WEDDING_DETAILS.weddingDateFormatted}</span>
@@ -59,7 +60,7 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Countdown Floating Card */}
-        <div className="w-full max-w-lg mt-6 bg-[#FDFCF0]/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E0D8C3] shadow-[0_12px_36px_rgba(90,90,64,0.08)]">
+        <div className="w-full max-w-lg mt-4 bg-[#FDFCF0]/97 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E0D8C3] shadow-[0_12px_36px_rgba(90,90,64,0.08)]">
           <h3 className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D8741] mb-5">
             Cuenta Regresiva
           </h3>
