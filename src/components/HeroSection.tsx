@@ -20,8 +20,8 @@ export const HeroSection: React.FC = () => {
           }}
         />
         {/* Natural Tones Soft Overlays */}
-        <div className="absolute inset-0 bg-[#FDFCF0]/10 backdrop-blur-[0.5px]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF0]/65 via-[#FDFCF0]/5 to-[#FDFCF0]/80" />
+        <div className="absolute inset-0 bg-[#FDFCF0]/5" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF0]/25 via-transparent to-[#FDFCF0]/35" />
       </div>
 
       {/* Main Hero Card Container */}
