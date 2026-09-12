@@ -16,12 +16,12 @@ export const HeroSection: React.FC = () => {
           className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-1000"
           style={{
             backgroundImage: `url("${heroCouple}")`,
-            backgroundPosition: 'center 58%',
+            backgroundPosition: 'center 72%',
           }}
         />
         {/* Natural Tones Soft Overlays */}
-        <div className="absolute inset-0 bg-[#FDFCF0]/10" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF0]/35 via-transparent to-[#FDFCF0]/45" />
+        <div className="absolute inset-0 bg-[#FDFCF0]/8" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF0]/25 via-transparent to-[#FDFCF0]/35" />
       </div>
 
       {/* Main Hero Card Container */}
@@ -52,7 +52,7 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Countdown Floating Card */}
-        <div className="w-full max-w-lg mt-14 bg-[#FDFCF0]/97 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E0D8C3] shadow-[0_12px_36px_rgba(90,90,64,0.08)]">
+        <div className="w-full max-w-lg mt-20 bg-[#FDFCF0]/97 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E0D8C3] shadow-[0_12px_36px_rgba(90,90,64,0.08)]">
           <h3 className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D8741] mb-5">
             Cuenta Regresiva
           </h3>
