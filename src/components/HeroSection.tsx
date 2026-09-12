@@ -26,14 +26,6 @@ export const HeroSection: React.FC = () => {
 
       {/* Main Hero Card Container */}
       <div className="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center text-center animate-fade-in">
-        {/* Natural Tones Eyebrow Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FDFCF0]/95 border border-[#8D8741]/40 shadow-sm mb-4 backdrop-blur-sm">
-          <Heart className="w-3.5 h-3.5 text-[#8D8741] fill-[#8D8741]" />
-          <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#5A5A40]">
-            Save the Date &bull; Unión en la Naturaleza
-          </span>
-        </div>
-
         {/* Couple Names */}
         <h1 className="font-serif-display text-4xl sm:text-6xl md:text-7xl font-bold text-[#333333] tracking-tight mb-2">
           Bárbara & Daniel
