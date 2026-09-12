@@ -16,12 +16,12 @@ export const HeroSection: React.FC = () => {
           className="w-full h-full bg-cover bg-center bg-no-repeat transition-transform duration-1000"
           style={{
             backgroundImage: `url("${heroCouple}")`,
-            backgroundPosition: 'center 20%',
+            backgroundPosition: 'center 58%',
           }}
         />
         {/* Natural Tones Soft Overlays */}
-        <div className="absolute inset-0 bg-[#FDFCF0]/5" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF0]/25 via-transparent to-[#FDFCF0]/35" />
+        <div className="absolute inset-0 bg-[#FDFCF0]/10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF0]/35 via-transparent to-[#FDFCF0]/45" />
       </div>
 
       {/* Main Hero Card Container */}
@@ -52,7 +52,7 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Countdown Floating Card */}
-        <div className="w-full max-w-lg mt-8 bg-[#FDFCF0]/97 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E0D8C3] shadow-[0_12px_36px_rgba(90,90,64,0.08)]">
+        <div className="w-full max-w-lg mt-14 bg-[#FDFCF0]/97 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E0D8C3] shadow-[0_12px_36px_rgba(90,90,64,0.08)]">
           <h3 className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D8741] mb-5">
             Cuenta Regresiva
           </h3>
@@ -60,7 +60,7 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-3.5 mt-10 w-full max-w-md justify-center">
+        <div className="flex flex-col sm:flex-row items-center gap-3.5 mt-12 w-full max-w-md justify-center">
           <a
             href="#rsvp"
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-[#5A5A40] text-white hover:bg-[#474732] transition-all shadow-md hover:shadow-lg text-xs uppercase tracking-[0.15em] font-semibold"
