@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { GuestProvider } from './context/GuestContext';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
-import { ParentsBlessingSection } from './components/ParentsBlessingSection';
 import { StorySection } from './components/StorySection';
 import { EventDetailsSection } from './components/EventDetailsSection';
 import { ProtocolSection } from './components/ProtocolSection';
@@ -93,7 +92,6 @@ export default function App() {
         {/* Main Wedding Invitation View */}
         <main className="w-full pb-24 md:pb-0">
           <HeroSection />
-          <ParentsBlessingSection />
           <StorySection />
           <EventDetailsSection />
           <ProtocolSection />
