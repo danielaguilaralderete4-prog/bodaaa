@@ -1,7 +1,4 @@
 import { TimelineEvent, GalleryPhoto } from '../types';
-import storyEmbrace from '../assets/images/story-embrace.jpeg';
-import storyLakeside from '../assets/images/story-lakeside.jpeg';
-import storyGazebo from '../assets/images/story-gazebo.jpeg';
 
 export const WEDDING_DETAILS = {
   brideName: 'Bárbara',
@@ -52,26 +49,4 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
   }
 ];
 
-export const GALLERY_PHOTOS: GalleryPhoto[] = [
-  {
-    id: 'p1',
-    url: storyEmbrace,
-    alt: 'Bárbara y Daniel caminando juntos junto al lago',
-    caption: 'Caminando juntos hacia nuestro futuro',
-    span: 'col-span-2 md:col-span-2 h-72 md:h-84'
-  },
-  {
-    id: 'p2',
-    url: storyLakeside,
-    alt: 'Bárbara y Daniel en el muelle',
-    caption: 'Nuestro horizonte compartido',
-    span: 'col-span-1 h-72 md:h-84'
-  },
-  {
-    id: 'p3',
-    url: storyGazebo,
-    alt: 'Bárbara y Daniel besándose en el puente',
-    caption: 'La felicidad de compartir cada día',
-    span: 'col-span-1 h-72 md:h-84'
-  }
-];
+export const GALLERY_PHOTOS: GalleryPhoto[] = [];
