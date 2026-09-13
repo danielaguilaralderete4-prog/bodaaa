@@ -26,7 +26,7 @@ export const HeroSection: React.FC = () => {
       {/* Main Hero Card Container */}
       <div className="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center text-center animate-fade-in">
         {/* Couple Names */}
-        <h1 className="font-serif-display text-4xl sm:text-6xl md:text-7xl font-bold text-[#333333] tracking-tight mb-2">
+        <h1 className="relative top-3 sm:top-0 font-serif-display text-4xl sm:text-6xl md:text-7xl font-bold text-[#111111] tracking-tight mb-2">
           Bárbara & Daniel
         </h1>
 
@@ -38,14 +38,14 @@ export const HeroSection: React.FC = () => {
         <div className="w-20 h-[1.5px] bg-gradient-to-r from-transparent via-[#8D8741] to-transparent my-2" />
 
         {/* Date & Location Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-4 text-[#333333] my-4 text-sm sm:text-base">
-          <div className="flex items-center gap-1.5 font-serif-display italic text-lg sm:text-xl text-[#333333]">
-            <Calendar className="w-4 h-4 text-[#333333]" />
+        <div className="relative top-3 sm:top-0 flex flex-wrap items-center justify-center gap-4 text-[#111111] my-4 text-sm sm:text-base">
+          <div className="flex items-center gap-1.5 font-serif-display italic text-lg sm:text-xl font-semibold text-[#111111]">
+            <Calendar className="w-4 h-4 text-[#111111]" />
             <span>{WEDDING_DETAILS.weddingDateFormatted}</span>
           </div>
           <span className="text-[#D8C3A5] hidden sm:inline">&bull;</span>
-          <div className="flex items-center gap-1.5 font-medium text-xs sm:text-sm tracking-wide text-[#333333]">
-            <MapPin className="w-3.5 h-3.5 text-[#333333]" />
+          <div className="flex items-center gap-1.5 font-semibold text-xs sm:text-sm tracking-wide text-[#111111]">
+            <MapPin className="w-3.5 h-3.5 text-[#111111]" />
             <span>Osorno, Los Lagos, Chile</span>
           </div>
         </div>
