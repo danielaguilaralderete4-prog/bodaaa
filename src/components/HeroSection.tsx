@@ -26,11 +26,11 @@ export const HeroSection: React.FC = () => {
       {/* Main Hero Card Container */}
       <div className="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center text-center animate-fade-in">
         {/* Couple Names */}
-        <h1 className="relative top-3 sm:top-0 font-serif-display text-4xl sm:text-6xl md:text-7xl font-bold text-[#111111] tracking-tight mb-2">
+        <h1 className="relative top-6 sm:top-3 font-serif-display text-5xl sm:text-7xl md:text-8xl font-bold text-[#111111] tracking-tight mb-2">
           Bárbara & Daniel
         </h1>
 
-        <p className="text-sm sm:text-base uppercase tracking-[0.2em] text-[#111111] font-semibold mb-3 [text-shadow:0_1px_2px_rgba(255,255,255,0.45)]">
+        <p className="relative top-6 sm:top-3 text-base sm:text-lg uppercase tracking-[0.24em] text-[#111111] font-semibold mb-3 [text-shadow:0_1px_2px_rgba(255,255,255,0.45)]">
           ¡Nos casamos!
         </p>
 
