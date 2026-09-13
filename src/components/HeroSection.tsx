@@ -83,10 +83,10 @@ export const HeroSection: React.FC = () => {
         {/* Scroll indicator */}
         <a
           href="#details"
-          className="mt-12 text-[#5A5A40]/70 hover:text-[#5A5A40] transition-colors animate-bounce flex flex-col items-center gap-1"
+          className="mt-8 inline-flex flex-col items-center gap-1.5 rounded-full border border-[#B9A66A]/70 bg-[#FDFCF0]/80 px-5 py-2.5 text-[#111111] shadow-[0_6px_18px_rgba(63,58,34,0.12)] backdrop-blur-sm transition-all hover:bg-[#FDFCF0]/95 animate-bounce"
         >
-          <span className="text-[10px] uppercase tracking-widest font-medium">Descubrir más</span>
-          <ChevronDown className="w-4 h-4 text-[#8D8741]" />
+          <span className="text-[10px] uppercase tracking-[0.22em] font-semibold">Descubrir más</span>
+          <ChevronDown className="w-4 h-4 text-[#8D8741]" strokeWidth={2.5} />
         </a>
       </div>
     </section>
