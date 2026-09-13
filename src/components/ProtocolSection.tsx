@@ -24,19 +24,24 @@ export const ProtocolSection: React.FC = () => {
       {/* Protocol Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Card 1: Dress Code */}
-        <div className="bg-[#FDFCF0] border border-[#E0D8C3] rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-center relative overflow-hidden group hover:border-[#5A5A40] transition-all min-h-[260px]">
+        <div className="md:col-span-2 bg-[#FDFCF0] border border-[#E0D8C3] rounded-3xl p-6 sm:p-8 shadow-sm flex items-center justify-center relative overflow-hidden group hover:border-[#5A5A40] transition-all min-h-[190px]">
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#EAE7DC]/40 rounded-bl-full pointer-events-none" />
-          <div className="relative text-center">
-            <div className="mx-auto w-14 h-14 rounded-2xl bg-[#F7F3E9] border border-[#E0D8C3] flex items-center justify-center text-[#5A5A40] mb-5">
+          <div className="relative w-full flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-8 text-center sm:text-left">
+            <div className="w-14 h-14 shrink-0 rounded-2xl bg-[#F7F3E9] border border-[#E0D8C3] flex items-center justify-center text-[#5A5A40]">
               <Shirt className="w-6 h-6 text-[#8D8741]" />
             </div>
-            <span className="text-xs uppercase tracking-[0.2em] text-[#8D8741] font-semibold block mb-2">
-              Código de vestimenta
-            </span>
-            <h3 className="font-serif-display text-2xl font-bold text-[#333333] mb-3">
-              Formal
-            </h3>
-            <div className="mx-auto w-16 h-px bg-gradient-to-r from-transparent via-[#BC986A] to-transparent" />
+            <div className="flex items-center gap-5 sm:gap-8">
+              <div className="hidden sm:block w-16 h-px bg-gradient-to-r from-transparent via-[#BC986A] to-transparent" />
+              <div>
+                <span className="text-xs uppercase tracking-[0.2em] text-[#8D8741] font-semibold block mb-2">
+                  Código de vestimenta
+                </span>
+                <h3 className="font-serif-display text-2xl sm:text-3xl font-bold text-[#333333]">
+                  Formal
+                </h3>
+              </div>
+              <div className="hidden sm:block w-16 h-px bg-gradient-to-r from-[#BC986A] to-transparent" />
+            </div>
           </div>
         </div>
 
