@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shirt, Users, Footprints, Trees, Sparkles, AlertCircle, Check } from 'lucide-react';
+import { Shirt, Users, Footprints, Trees, Sparkles } from 'lucide-react';
 
 export const ProtocolSection: React.FC = () => {
   return (
@@ -30,24 +30,9 @@ export const ProtocolSection: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-[#F7F3E9] border border-[#E0D8C3] flex items-center justify-center text-[#5A5A40] mb-5">
               <Shirt className="w-6 h-6 text-[#8D8741]" />
             </div>
-            <span className="text-xs uppercase tracking-[0.2em] text-[#8D8741] font-semibold block mb-1">
-              Dress Code
-            </span>
             <h3 className="font-serif-display text-2xl font-bold text-[#333333] mb-3">
-              Rigurosa Etiqueta Formal
+              Código de vestimenta formal
             </h3>
-            <p className="text-sm text-[#6B6B56] leading-relaxed mb-4">
-              Traje formal o esmoquin para caballeros y vestido largo / cóctel elegante para damas.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#F7F3E9] border border-[#BC986A]/40 mt-2">
-            <div className="flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-[#8D8741] shrink-0 mt-0.5" />
-              <p className="text-xs text-[#5A5A40] font-medium leading-relaxed">
-                <strong>Protocolo de Color:</strong> Agradecemos con mucho cariño <span className="underline decoration-[#8D8741]">evitar el uso de blanco o azul marino</span> (reservados exclusivamente para los novios).
-              </p>
-            </div>
           </div>
         </div>
 
