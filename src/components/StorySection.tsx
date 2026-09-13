@@ -1,7 +1,11 @@
-import React from 'react';
-import { Heart, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { GALLERY_PHOTOS } from '../data/weddingInfo';
+import { GalleryPhoto } from '../types';
+import { Heart, Sparkles, X, ZoomIn } from 'lucide-react';
 
 export const StorySection: React.FC = () => {
+  const [selectedPhoto, setSelectedPhoto] = useState<GalleryPhoto | null>(null);
+
   return (
     <section id="details" className="py-20 sm:py-28 px-4 sm:px-6 max-w-5xl mx-auto">
       {/* Section Title Header */}
@@ -23,6 +27,39 @@ export const StorySection: React.FC = () => {
         <div className="w-24 h-[1.5px] bg-gradient-to-r from-transparent via-[#BC986A] to-transparent mt-8" />
       </div>
 
+      {/* Two-photo gallery */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6">
+        {GALLERY_PHOTOS.map((photo, index) => (
+          <button
+            key={photo.id}
+            type="button"
+            onClick={() => setSelectedPhoto(photo)}
+            className={`${photo.span ?? ''} relative h-80 sm:h-96 overflow-hidden rounded-3xl border border-[#E0D8C3] shadow-sm group cursor-pointer text-left`}
+            aria-label={`Ver fotografía: ${photo.caption ?? photo.alt}`}
+          >
+            <img
+              src={photo.url}
+              alt={photo.alt}
+              className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${
+                index === 0 ? 'object-center' : 'object-center'
+              }`}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-5">
+              <div className="text-white flex items-center justify-between w-full">
+                <span className="text-sm font-medium">{photo.caption}</span>
+                <ZoomIn className="w-5 h-5 text-[#EAE7DC]" />
+              </div>
+            </div>
+            {index === 0 && (
+              <>
+                <div className="absolute inset-3 sm:inset-4 border border-[#FDFCF0]/60 pointer-events-none rounded-2xl" />
+                <div className="absolute inset-4 sm:inset-5 border border-[#BC986A]/40 pointer-events-none rounded-xl" />
+              </>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Quote Card */}
       <div className="max-w-3xl mx-auto relative rounded-3xl overflow-hidden bg-[#F7F3E9] border border-[#E0D8C3] flex flex-col justify-center items-center p-8 sm:p-10 text-center shadow-sm">
           <Sparkles className="w-8 h-8 text-[#8D8741] mb-4 opacity-80" />
@@ -34,6 +71,33 @@ export const StorySection: React.FC = () => {
           </span>
       </div>
 
+      {selectedPhoto && (
+        <div
+          onClick={() => setSelectedPhoto(null)}
+          className="fixed inset-0 z-50 bg-[#333333]/90 backdrop-blur-md flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            className="relative max-w-4xl max-h-[90vh] bg-[#333333] rounded-3xl overflow-hidden shadow-2xl border border-[#E0D8C3]/30 flex flex-col"
+          >
+            <button
+              onClick={() => setSelectedPhoto(null)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/60 text-white hover:bg-black flex items-center justify-center transition-colors"
+              aria-label="Cerrar fotografía"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <img
+              src={selectedPhoto.url}
+              alt={selectedPhoto.alt}
+              className="max-h-[75vh] w-auto object-contain"
+            />
+            <div className="p-4 bg-[#2A2A20] text-[#FDFCF0] text-center text-sm font-medium border-t border-white/10">
+              {selectedPhoto.caption}
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

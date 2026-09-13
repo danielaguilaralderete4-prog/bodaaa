@@ -1,4 +1,6 @@
 import { TimelineEvent, GalleryPhoto } from '../types';
+import galleryPierKiss from '../assets/images/gallery-pier-kiss.jpeg';
+import galleryBeachPortrait from '../assets/images/gallery-beach-portrait.jpeg';
 
 export const WEDDING_DETAILS = {
   brideName: 'Bárbara',
@@ -15,6 +17,23 @@ export const WEDDING_DETAILS = {
   parisNoviosCode: '21054461',
   contactWhatsApp: '+56954401828'
 };
+
+export const GALLERY_PHOTOS: GalleryPhoto[] = [
+  {
+    id: 'p1',
+    url: galleryPierKiss,
+    alt: 'Bárbara y Daniel besándose en el muelle',
+    caption: 'Un amor que celebra cada instante',
+    span: 'col-span-1 sm:col-span-2'
+  },
+  {
+    id: 'p2',
+    url: galleryBeachPortrait,
+    alt: 'Bárbara y Daniel junto al lago',
+    caption: 'Siempre juntos frente al horizonte',
+    span: 'col-span-1'
+  }
+];
 
 export const TIMELINE_EVENTS: TimelineEvent[] = [
   {
@@ -48,5 +67,3 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
     iconName: 'nightlife'
   }
 ];
-
-export const GALLERY_PHOTOS: GalleryPhoto[] = [];
