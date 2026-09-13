@@ -53,10 +53,10 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateISO })
   return (
     <div
       id="countdown-container"
-      className="flex items-center justify-center gap-3 sm:gap-6 md:gap-8 text-center"
+      className="grid grid-cols-4 divide-x divide-[#C8B77A]/45 text-center"
     >
       {/* Days */}
-      <div className="flex flex-col items-center min-w-[56px] sm:min-w-[72px]">
+      <div className="flex flex-col items-center px-2 sm:px-4">
         <span
           id="days"
           className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#333333] tracking-tight"
@@ -68,10 +68,8 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateISO })
         </span>
       </div>
 
-      <div className="text-2xl sm:text-3xl text-[#D8C3A5] font-light -mt-4">:</div>
-
       {/* Hours */}
-      <div className="flex flex-col items-center min-w-[56px] sm:min-w-[72px]">
+      <div className="flex flex-col items-center px-2 sm:px-4">
         <span
           id="hours"
           className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#333333] tracking-tight"
@@ -83,10 +81,8 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateISO })
         </span>
       </div>
 
-      <div className="text-2xl sm:text-3xl text-[#D8C3A5] font-light -mt-4">:</div>
-
       {/* Minutes */}
-      <div className="flex flex-col items-center min-w-[56px] sm:min-w-[72px]">
+      <div className="flex flex-col items-center px-2 sm:px-4">
         <span
           id="mins"
           className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#333333] tracking-tight"
@@ -98,10 +94,8 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateISO })
         </span>
       </div>
 
-      <div className="text-2xl sm:text-3xl text-[#D8C3A5] font-light -mt-4">:</div>
-
       {/* Seconds */}
-      <div className="flex flex-col items-center min-w-[56px] sm:min-w-[72px]">
+      <div className="flex flex-col items-center px-2 sm:px-4">
         <span
           id="secs"
           className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#8D8741] tracking-tight"

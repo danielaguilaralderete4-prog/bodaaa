@@ -51,11 +51,17 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Countdown Floating Card */}
-        <div className="w-full max-w-lg mt-[28rem] sm:mt-[28rem] bg-[#FDFCF0]/97 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E0D8C3] shadow-[0_12px_36px_rgba(90,90,64,0.08)]">
-          <h3 className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D8741] mb-5">
-            Cuenta Regresiva
-          </h3>
-          <CountdownTimer targetDateISO={WEDDING_DETAILS.weddingDateISO} />
+        <div className="w-full max-w-lg mt-[28rem] sm:mt-[28rem] rounded-[2rem] border border-[#B9A66A]/70 bg-[#FDFCF0]/95 p-2 shadow-[0_18px_45px_rgba(63,58,34,0.18)] backdrop-blur-md">
+          <div className="rounded-[1.65rem] border border-[#D8C79A]/70 px-4 py-5 sm:px-6 sm:py-6">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#B9A66A]" />
+              <h3 className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#8D8741]">
+                Cuenta Regresiva
+              </h3>
+              <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#B9A66A]" />
+            </div>
+            <CountdownTimer targetDateISO={WEDDING_DETAILS.weddingDateISO} />
+          </div>
         </div>
 
         {/* CTA Buttons */}
