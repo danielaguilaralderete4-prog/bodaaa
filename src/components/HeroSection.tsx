@@ -38,7 +38,7 @@ export const HeroSection: React.FC = () => {
         <div className="w-20 h-[1.5px] bg-gradient-to-r from-transparent via-[#8D8741] to-transparent my-2" />
 
         {/* Date & Location Badges */}
-        <div className="relative top-3 sm:top-[26rem] sm:z-20 flex flex-wrap items-center justify-center gap-4 rounded-full bg-[#FDFCF0]/35 px-4 py-2 text-[#111111] my-4 text-sm sm:text-base shadow-sm backdrop-blur-[2px]">
+        <div className="relative top-3 sm:top-[28rem] sm:z-20 flex flex-wrap items-center justify-center gap-4 rounded-full bg-[#FDFCF0]/35 px-4 py-2 text-[#111111] my-4 text-sm sm:text-base shadow-sm backdrop-blur-[2px]">
           <div className="flex items-center gap-1.5 font-serif-display italic text-lg sm:text-xl font-semibold text-[#111111]">
             <Calendar className="w-4 h-4 text-[#111111]" />
             <span className="[text-shadow:0_1px_2px_rgba(255,255,255,0.5)]">{WEDDING_DETAILS.weddingDateFormatted}</span>
