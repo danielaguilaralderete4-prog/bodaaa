@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shirt, Users, Footprints, Trees, Sparkles } from 'lucide-react';
+import { Shirt, Users, Footprints, Sparkles } from 'lucide-react';
 
 export const ProtocolSection: React.FC = () => {
   return (
@@ -70,51 +70,21 @@ export const ProtocolSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Card 3: Footwear / Lawn Recommendation */}
-        <div className="bg-[#FDFCF0] border border-[#E0D8C3] rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between relative overflow-hidden group hover:border-[#5A5A40] transition-all">
-          <div>
-            <div className="w-12 h-12 rounded-2xl bg-[#F7F3E9] border border-[#E0D8C3] flex items-center justify-center text-[#5A5A40] mb-5">
+        {/* Card 3: Guest recommendation */}
+        <div className="md:col-span-2 bg-[#FDFCF0] border border-[#E0D8C3] rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden group hover:border-[#5A5A40] transition-all">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#EAE7DC]/40 rounded-bl-full pointer-events-none" />
+          <div className="relative flex flex-col sm:flex-row items-center gap-5 sm:gap-7 text-center sm:text-left">
+            <div className="w-12 h-12 shrink-0 rounded-2xl bg-[#F7F3E9] border border-[#E0D8C3] flex items-center justify-center text-[#5A5A40]">
               <Footprints className="w-6 h-6 text-[#8D8741]" />
             </div>
-            <span className="text-xs uppercase tracking-[0.2em] text-[#8D8741] font-semibold block mb-1">
-              Recomendación de Calzado
-            </span>
-            <h3 className="font-serif-display text-2xl font-bold text-[#333333] mb-3">
-              Áreas de Césped & Jardines
-            </h3>
-            <p className="text-sm text-[#6B6B56] leading-relaxed mb-2">
-              Tanto la ceremonia como el cóctel de bienvenida se llevarán a cabo en los hermosos jardines del centro de eventos.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#F7F3E9] border border-[#E0D8C3] mt-4">
-            <p className="text-xs text-[#6B6B56] leading-relaxed">
-              Sugerimos a nuestras invitadas considerar tacón ancho, corrido, cubretacones o calzado cómodo apto para superficies de pasto.
-            </p>
-          </div>
-        </div>
-
-        {/* Card 4: Spaces & Venue Comforts */}
-        <div className="bg-[#FDFCF0] border border-[#E0D8C3] rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between relative overflow-hidden group hover:border-[#5A5A40] transition-all">
-          <div>
-            <div className="w-12 h-12 rounded-2xl bg-[#F7F3E9] border border-[#E0D8C3] flex items-center justify-center text-[#5A5A40] mb-5">
-              <Trees className="w-6 h-6 text-[#8D8741]" />
+            <div>
+              <span className="text-xs uppercase tracking-[0.2em] text-[#8D8741] font-semibold block mb-1">
+                Recomendaciones
+              </span>
+              <p className="text-sm sm:text-base text-[#6B6B56] leading-relaxed">
+                A nuestras invitadas les recomendamos considerar un calzado cómodo, ya que habrá sectores con césped durante el evento.
+              </p>
             </div>
-            <span className="text-xs uppercase tracking-[0.2em] text-[#8D8741] font-semibold block mb-1">
-              Espacios & Comodidades
-            </span>
-            <h3 className="font-serif-display text-2xl font-bold text-[#333333] mb-3">
-              Estacionamiento & Áreas Verdes
-            </h3>
-            <p className="text-sm text-[#6B6B56] leading-relaxed mb-2">
-              El Centro eventos Matri cuenta con amplio estacionamiento para todos los vehículos, hermosas áreas verdes al aire libre y baños privados para su total confort.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#F7F3E9] border border-[#E0D8C3] mt-4">
-            <p className="text-xs text-[#6B6B56] leading-relaxed">
-              Un entorno natural, tranquilo y espacioso pensado para que disfruten cada momento de la celebración junto a nosotros.
-            </p>
           </div>
         </div>
       </div>
