@@ -53,7 +53,10 @@ export const ProtocolSection: React.FC = () => {
                 Ambiente
               </span>
               <p className="text-sm sm:text-base text-[#6B6B56] leading-relaxed">
-                Celebración exclusiva para adultos.
+                Celebración exclusiva para adultos. Adoramos a los niños, sin embargo, queremos que todos nuestros invitados puedan relajarse y disfrutar plenamente de esta noche tan especial.
+              </p>
+              <p className="text-xs text-[#6B6B56] italic leading-relaxed mt-2">
+                Agradecemos profundamente su comprensión y apoyo.
               </p>
             </div>
           </div>
