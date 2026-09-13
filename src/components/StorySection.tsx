@@ -51,7 +51,7 @@ export const StorySection: React.FC = () => {
           </div>
         </div>
 
-        {/* Second Photo: Rings */}
+        {/* Second Photo */}
         <div
           onClick={() => setSelectedPhoto(GALLERY_PHOTOS[1])}
           className="col-span-1 relative rounded-3xl overflow-hidden group cursor-pointer aspect-square sm:aspect-auto sm:h-84 border border-[#E0D8C3] shadow-sm hover:shadow-md transition-shadow"
@@ -69,7 +69,7 @@ export const StorySection: React.FC = () => {
           </div>
         </div>
 
-        {/* Third Photo: Black and white */}
+        {/* Third Photo */}
         <div
           onClick={() => setSelectedPhoto(GALLERY_PHOTOS[2])}
           className="col-span-1 relative rounded-3xl overflow-hidden group cursor-pointer aspect-square sm:aspect-auto sm:h-84 border border-[#E0D8C3] shadow-sm hover:shadow-md transition-shadow"
@@ -100,7 +100,7 @@ export const StorySection: React.FC = () => {
       </div>
 
       <div className="mt-4 sm:mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-        {GALLERY_PHOTOS.slice(4).map((photo) => (
+        {GALLERY_PHOTOS.slice(3).map((photo) => (
           <button
             key={photo.id}
             type="button"

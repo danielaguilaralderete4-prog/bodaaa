@@ -1,11 +1,6 @@
 import { TimelineEvent, GalleryPhoto } from '../types';
-import storyWalk from '../assets/images/story-walk.jpeg';
-import storyKiss from '../assets/images/story-kiss.jpeg';
 import storyEmbrace from '../assets/images/story-embrace.jpeg';
-import storyBridgeKiss from '../assets/images/story-bridge-kiss.jpeg';
 import storyLakeside from '../assets/images/story-lakeside.jpeg';
-import storyLanterns from '../assets/images/story-lanterns.jpeg';
-import storyDance from '../assets/images/story-dance.jpeg';
 import storyGazebo from '../assets/images/story-gazebo.jpeg';
 
 export const WEDDING_DETAILS = {
@@ -60,58 +55,23 @@ export const TIMELINE_EVENTS: TimelineEvent[] = [
 export const GALLERY_PHOTOS: GalleryPhoto[] = [
   {
     id: 'p1',
-    url: storyWalk,
-    alt: 'Bárbara y Daniel en su sesión de compromiso formal',
-    caption: 'Nuestro compromiso en el jardín histórico',
+    url: storyEmbrace,
+    alt: 'Bárbara y Daniel caminando juntos junto al lago',
+    caption: 'Caminando juntos hacia nuestro futuro',
     span: 'col-span-2 md:col-span-2 h-72 md:h-84'
   },
   {
     id: 'p2',
-    url: storyKiss,
-    alt: 'Detalle de las manos entrelazadas y anillos',
-    caption: 'La promesa que nos une para siempre',
-    span: 'col-span-1 h-72 md:h-84'
-  },
-  {
-    id: 'p3',
-    url: storyEmbrace,
-    alt: 'Retrato artístico blanco y negro caminando juntos',
-    caption: 'Caminando juntos hacia nuestro futuro',
-    span: 'col-span-1 h-72 md:h-84'
-  },
-  {
-    id: 'p4',
-    url: storyBridgeKiss,
-    alt: 'Celebración y sonrisas de los novios',
-    caption: 'La felicidad de compartir cada día',
-    span: 'col-span-1 md:col-span-2 h-72 md:h-84'
-  },
-  {
-    id: 'p5',
     url: storyLakeside,
-    alt: 'Bárbara y Daniel junto al lago',
+    alt: 'Bárbara y Daniel en el muelle',
     caption: 'Nuestro horizonte compartido',
     span: 'col-span-1 h-72 md:h-84'
   },
   {
-    id: 'p6',
-    url: storyLanterns,
-    alt: 'Bárbara y Daniel frente al lago',
-    caption: 'Un instante para guardar',
-    span: 'col-span-1 h-72 md:h-84'
-  },
-  {
-    id: 'p7',
-    url: storyDance,
-    alt: 'Bárbara y Daniel bailando en el muelle',
-    caption: 'Bailar la vida juntos',
-    span: 'col-span-1 h-72 md:h-84'
-  },
-  {
-    id: 'p8',
+    id: 'p3',
     url: storyGazebo,
-    alt: 'Bárbara y Daniel de espaldas frente al lago',
-    caption: 'Siempre del mismo lado',
+    alt: 'Bárbara y Daniel besándose en el puente',
+    caption: 'La felicidad de compartir cada día',
     span: 'col-span-1 h-72 md:h-84'
   }
 ];
