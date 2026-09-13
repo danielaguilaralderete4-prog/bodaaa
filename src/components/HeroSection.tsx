@@ -26,7 +26,7 @@ export const HeroSection: React.FC = () => {
       {/* Main Hero Card Container */}
       <div className="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center text-center animate-fade-in">
         {/* Couple Names */}
-        <h1 className="relative top-6 sm:top-3 font-serif-display text-[2.65rem] sm:text-7xl md:text-8xl font-bold text-[#111111] tracking-tight mb-2">
+        <h1 className="relative top-6 sm:top-3 whitespace-nowrap font-serif-display text-[2.65rem] sm:text-6xl md:text-7xl font-bold text-[#111111] tracking-tight mb-2">
           Bárbara & Daniel
         </h1>
 
