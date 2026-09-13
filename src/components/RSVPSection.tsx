@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useGuests } from '../context/GuestContext';
 import { Guest } from '../types';
 import { WEDDING_DETAILS } from '../data/weddingInfo';
-import rsvpKiss from '../assets/images/rsvp-kiss.jpeg';
 import {
   Mail,
   CheckCircle,
@@ -11,7 +10,6 @@ import {
   RotateCcw,
   Sparkles,
   Send,
-  Heart,
   Utensils,
   Phone,
   MessageSquare,
@@ -238,38 +236,24 @@ export const RSVPSection: React.FC = () => {
 
       {/* Main RSVP Card */}
       <div className="bg-[#FDFCF0] border border-[#E0D8C3] rounded-3xl p-6 sm:p-10 md:p-12 shadow-sm relative overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-          {/* Left Column: Photograph (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col items-center text-center">
-            <div className="relative w-full max-w-sm aspect-[4/5] rounded-3xl overflow-hidden border-2 border-[#BC986A]/40 p-1.5 shadow-md group">
-              <img
-                src={rsvpKiss}
-                alt="Bárbara & Daniel"
-                className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex flex-col justify-end p-5 text-white text-left">
-                <span className="text-[11px] uppercase tracking-widest text-[#E0D8C3] font-semibold">
-                  12 de Diciembre, 2026
-                </span>
-                <p className="font-serif-display text-lg font-bold">
-                  Bárbara & Daniel
-                </p>
-              </div>
+        <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[#EAE7DC]/45 pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-52 h-52 rounded-full border border-[#BC986A]/20 pointer-events-none" />
+        <div className="relative max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-[#F7F3E9] border border-[#BC986A]/50 flex items-center justify-center text-[#8D8741] shadow-sm">
+              <Mail className="w-6 h-6" />
             </div>
-
-            {/* Reassurance Note */}
-            <div className="mt-6 w-full max-w-sm p-4 bg-[#F7F3E9] rounded-2xl border border-[#E0D8C3] text-left">
-              <div className="flex items-start gap-2.5">
-                <Heart className="w-4 h-4 text-[#8D8741] shrink-0 mt-0.5" />
-                <p className="text-xs text-[#6B6B56] leading-relaxed">
-                  Los cupos son personales y reservados con antelación para que disfrutes de una velada inolvidable.
-                </p>
-              </div>
-            </div>
+            <div className="w-16 h-px bg-gradient-to-r from-transparent via-[#BC986A] to-transparent mx-auto mt-5 mb-4" />
+            <p className="text-xs uppercase tracking-[0.2em] text-[#8D8741] font-semibold">
+              Tus cupos están reservados
+            </p>
+            <p className="text-sm text-[#6B6B56] leading-relaxed mt-2">
+              Busca tu nombre para confirmar tu asistencia y disfrutar juntos de este día tan especial.
+            </p>
           </div>
 
-          {/* Right Column: RSVP Form (7 cols) */}
-          <div className="lg:col-span-7 flex flex-col justify-center">
+          {/* RSVP Form */}
+          <div>
             {confirmedData ? (
               /* Success / Confirmation Screen */
               <div className="space-y-6 text-center animate-fade-in py-2">
