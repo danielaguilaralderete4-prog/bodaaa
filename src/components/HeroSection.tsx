@@ -30,7 +30,7 @@ export const HeroSection: React.FC = () => {
           Bárbara & Daniel
         </h1>
 
-        <p className="text-sm sm:text-base uppercase tracking-[0.2em] text-[#6B6B56] font-medium mb-3">
+        <p className="text-sm sm:text-base uppercase tracking-[0.2em] text-[#111111] font-semibold mb-3 [text-shadow:0_1px_2px_rgba(255,255,255,0.45)]">
           ¡Nos casamos!
         </p>
 
@@ -38,15 +38,15 @@ export const HeroSection: React.FC = () => {
         <div className="w-20 h-[1.5px] bg-gradient-to-r from-transparent via-[#8D8741] to-transparent my-2" />
 
         {/* Date & Location Badges */}
-        <div className="relative top-3 sm:top-0 flex flex-wrap items-center justify-center gap-4 text-[#111111] my-4 text-sm sm:text-base">
+        <div className="relative top-3 sm:top-0 flex flex-wrap items-center justify-center gap-4 rounded-full bg-[#FDFCF0]/35 px-4 py-2 text-[#111111] my-4 text-sm sm:text-base shadow-sm backdrop-blur-[2px]">
           <div className="flex items-center gap-1.5 font-serif-display italic text-lg sm:text-xl font-semibold text-[#111111]">
             <Calendar className="w-4 h-4 text-[#111111]" />
-            <span>{WEDDING_DETAILS.weddingDateFormatted}</span>
+            <span className="[text-shadow:0_1px_2px_rgba(255,255,255,0.5)]">{WEDDING_DETAILS.weddingDateFormatted}</span>
           </div>
           <span className="text-[#D8C3A5] hidden sm:inline">&bull;</span>
           <div className="flex items-center gap-1.5 font-semibold text-xs sm:text-sm tracking-wide text-[#111111]">
             <MapPin className="w-3.5 h-3.5 text-[#111111]" />
-            <span>Osorno, Los Lagos, Chile</span>
+            <span className="[text-shadow:0_1px_2px_rgba(255,255,255,0.5)]">Osorno, Los Lagos, Chile</span>
           </div>
         </div>
 
