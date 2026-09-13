@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { WEDDING_DETAILS, TIMELINE_EVENTS } from '../data/weddingInfo';
+import { WEDDING_DETAILS } from '../data/weddingInfo';
 import eventMapImage from '../assets/images/event-map-real.png';
 import {
   MapPin,
@@ -10,11 +10,6 @@ import {
   CalendarPlus,
   Share2,
   Car,
-  Church,
-  Wine,
-  Utensils,
-  PartyPopper,
-  Music,
 } from 'lucide-react';
 
 export const EventDetailsSection: React.FC = () => {
@@ -27,8 +22,8 @@ export const EventDetailsSection: React.FC = () => {
       'Celebración del Matrimonio de Bárbara & Daniel. \nLugar: Centro eventos Matri, Osorno.\nCódigo de Vestimenta: Formal (evitar blanco o azul marino).\n¡Los esperamos para celebrar juntos!'
     );
     const location = encodeURIComponent(WEDDING_DETAILS.venueAddress);
-    // 2026-12-12 17:00 to 2026-12-13 04:00 (Osorno Chile UTC-3 in December -> 20261212T200000Z to 20261213T070000Z)
-    const dates = '20261212T200000Z/20261213T070000Z';
+    // 2026-12-12 15:30 to 2026-12-13 04:00 (Osorno Chile UTC-3 in December).
+    const dates = '20261212T183000Z/20261213T070000Z';
     return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&location=${location}`;
   };
 
@@ -42,7 +37,7 @@ BEGIN:VEVENT
 SUMMARY:Matrimonio Bárbara & Daniel 💍
 DESCRIPTION:Celebración de la Boda de Bárbara & Daniel.\\nCentro eventos Matri, Osorno.
 LOCATION:${WEDDING_DETAILS.venueAddress}
-DTSTART:20261212T200000Z
+DTSTART:20261212T183000Z
 DTEND:20261213T070000Z
 STATUS:CONFIRMED
 END:VEVENT
@@ -58,23 +53,6 @@ END:VCALENDAR`;
     document.body.removeChild(link);
     setCopiedCalendar(true);
     setTimeout(() => setCopiedCalendar(false), 3000);
-  };
-
-  const getTimelineIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'church':
-        return <Church className="w-5 h-5" />;
-      case 'local_bar':
-        return <Wine className="w-5 h-5" />;
-      case 'restaurant':
-        return <Utensils className="w-5 h-5" />;
-      case 'celebration':
-        return <PartyPopper className="w-5 h-5" />;
-      case 'nightlife':
-        return <Music className="w-5 h-5" />;
-      default:
-        return <Clock className="w-5 h-5" />;
-    }
   };
 
   return (
@@ -93,10 +71,8 @@ END:VCALENDAR`;
         <div className="w-24 h-[1.5px] bg-gradient-to-r from-transparent via-[#BC986A] to-transparent mt-4" />
       </div>
 
-      {/* Main Grid: Venue Card on Left, Timeline on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-        {/* Left Column: Venue Details & Google Maps Link (5 cols) */}
-        <div className="lg:col-span-5 flex flex-col gap-6">
+      {/* Venue details */}
+      <div className="max-w-2xl mx-auto">
           <div className="bg-[#FDFCF0] border border-[#E0D8C3] rounded-3xl p-6 sm:p-8 relative shadow-sm">
             {/* Corner Decorative Ornaments */}
             <div className="absolute top-3 left-3 w-3 h-3 border-t-2 border-l-2 border-[#5A5A40]" />
@@ -177,50 +153,6 @@ END:VCALENDAR`;
             </div>
           </div>
         </div>
-
-        {/* Right Column: Wedding Timeline (7 cols) */}
-        <div className="lg:col-span-7 bg-[#FDFCF0] border border-[#E0D8C3] rounded-3xl p-6 sm:p-8 shadow-sm">
-          <div className="flex items-center justify-between mb-8 pb-4 border-b border-[#E0D8C3]">
-            <div>
-              <span className="text-xs uppercase tracking-[0.2em] text-[#8D8741] font-semibold">
-                Itinerario
-              </span>
-              <h3 className="font-serif-display text-2xl text-[#333333] font-bold">
-                Cronograma del Gran Día
-              </h3>
-            </div>
-            <span className="text-xs font-semibold text-[#5A5A40] bg-[#EAE7DC] px-3 py-1.5 rounded-full border border-[#E0D8C3]">
-              Sábado 12.12.2026
-            </span>
-          </div>
-
-          {/* Timeline items list */}
-          <div className="relative pl-6 sm:pl-8 space-y-8 before:absolute before:left-3 sm:before:left-4 before:top-3 before:bottom-3 before:w-[2px] before:bg-gradient-to-b before:from-[#5A5A40] before:via-[#8D8741] before:to-[#BC986A]/40">
-            {TIMELINE_EVENTS.map((event, index) => (
-              <div key={index} className="relative group">
-                {/* Node icon circle */}
-                <div className="absolute -left-6 sm:-left-8 top-0.5 w-6 sm:w-8 h-6 sm:h-8 rounded-full bg-[#FDFCF0] border-2 border-[#5A5A40] text-[#5A5A40] flex items-center justify-center shadow-sm group-hover:bg-[#EAE7DC] group-hover:scale-110 transition-all">
-                  <div className="scale-75 sm:scale-90">{getTimelineIcon(event.iconName)}</div>
-                </div>
-
-                <div className="bg-[#F7F3E9] hover:bg-[#EAE7DC]/80 p-4 sm:p-5 rounded-2xl border border-[#E0D8C3] transition-all">
-                  <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1.5">
-                    <h4 className="font-serif-display text-lg sm:text-xl font-bold text-[#333333]">
-                      {event.title}
-                    </h4>
-                    <span className="text-xs font-bold text-[#8D8741] bg-[#FDFCF0] px-2.5 py-0.5 rounded-full border border-[#E0D8C3]">
-                      {event.time} Hrs
-                    </span>
-                  </div>
-                  <p className="text-sm text-[#6B6B56] leading-relaxed">
-                    {event.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </section>
   );
 };
