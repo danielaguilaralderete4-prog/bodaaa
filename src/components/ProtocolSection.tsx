@@ -24,7 +24,7 @@ export const ProtocolSection: React.FC = () => {
       {/* Protocol Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Card 1: Dress Code */}
-        <div className="md:col-span-2 bg-[#FDFCF0] border border-[#E0D8C3] rounded-3xl p-6 sm:p-8 shadow-sm flex items-center justify-center relative overflow-hidden group hover:border-[#5A5A40] transition-all min-h-[190px]">
+        <div className="bg-[#FDFCF0] border border-[#E0D8C3] rounded-3xl p-6 sm:p-8 shadow-sm flex items-center justify-center relative overflow-hidden group hover:border-[#5A5A40] transition-all min-h-[190px]">
           <div className="absolute top-0 right-0 w-24 h-24 bg-[#EAE7DC]/40 rounded-bl-full pointer-events-none" />
           <div className="relative w-full flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-8 text-center sm:text-left">
             <div className="w-14 h-14 shrink-0 rounded-2xl bg-[#F7F3E9] border border-[#E0D8C3] flex items-center justify-center text-[#5A5A40]">
