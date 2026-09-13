@@ -13,7 +13,7 @@ export const HeroSection: React.FC = () => {
       {/* Background Image with Natural Tones Editorial Overlay */}
       <div className="absolute inset-0 w-full h-full z-0">
         <div
-          className="w-full h-full bg-[length:auto_145%] bg-bottom bg-no-repeat sm:bg-cover sm:bg-[center_82%] transition-transform duration-1000"
+          className="w-full h-full bg-[length:auto_125%] bg-[center_90%] bg-no-repeat sm:bg-cover sm:bg-[center_82%] transition-transform duration-1000"
           style={{
             backgroundImage: `url("${heroCouple}")`,
           }}
