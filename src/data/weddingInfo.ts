@@ -21,17 +21,7 @@ export const WEDDING_DETAILS = {
   googleMapsUrl: 'https://maps.app.goo.gl/h3vNFbHpCvgvdFx27',
   parisNoviosUrl: 'https://club.noviosparis.cl/home/couple-catalog/21054461',
   parisNoviosCode: '21054461',
-  contactWhatsApp: '+56954401828',
-  parents: {
-    bride: {
-      father: 'German Masafierro',
-      mother: 'Carolina León'
-    },
-    groom: {
-      father: 'Salomon Aguilar',
-      mother: 'Rosita Alderete'
-    }
-  }
+  contactWhatsApp: '+56954401828'
 };
 
 export const TIMELINE_EVENTS: TimelineEvent[] = [
