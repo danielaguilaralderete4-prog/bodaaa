@@ -38,7 +38,7 @@ export const HeroSection: React.FC = () => {
         <div className="w-20 h-[1.5px] bg-gradient-to-r from-transparent via-[#8D8741] to-transparent my-2" />
 
         {/* Date & Location Badges */}
-        <div className="relative top-3 sm:top-0 flex flex-wrap items-center justify-center gap-4 rounded-full bg-[#FDFCF0]/35 px-4 py-2 text-[#111111] my-4 text-sm sm:text-base shadow-sm backdrop-blur-[2px]">
+        <div className="relative top-3 sm:top-[24rem] sm:z-20 flex flex-wrap items-center justify-center gap-4 rounded-full bg-[#FDFCF0]/35 px-4 py-2 text-[#111111] my-4 text-sm sm:text-base shadow-sm backdrop-blur-[2px]">
           <div className="flex items-center gap-1.5 font-serif-display italic text-lg sm:text-xl font-semibold text-[#111111]">
             <Calendar className="w-4 h-4 text-[#111111]" />
             <span className="[text-shadow:0_1px_2px_rgba(255,255,255,0.5)]">{WEDDING_DETAILS.weddingDateFormatted}</span>
@@ -51,7 +51,7 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Countdown Floating Card */}
-        <div className="w-full max-w-lg mt-[28rem] sm:mt-64 bg-[#FDFCF0]/97 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E0D8C3] shadow-[0_12px_36px_rgba(90,90,64,0.08)]">
+        <div className="w-full max-w-lg mt-[28rem] sm:mt-[28rem] bg-[#FDFCF0]/97 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#E0D8C3] shadow-[0_12px_36px_rgba(90,90,64,0.08)]">
           <h3 className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D8741] mb-5">
             Cuenta Regresiva
           </h3>
