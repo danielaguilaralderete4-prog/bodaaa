@@ -13,7 +13,6 @@
         "cupos_confirmados": { "type": "number", "description": "Number of confirmed attendees" },
         "asistira": { "type": "boolean", "description": "True if attending, false if declining, null if pending" },
         "asistentes_nombres": { "type": "array", "description": "List of names of the attendees" },
-        "comentarios_dieta": { "type": "string", "description": "Dietary restrictions or allergies" },
         "mensaje_novios": { "type": "string", "description": "Heartfelt greeting or message for the couple" },
         "fecha_confirmacion": { "type": "string", "description": "ISO timestamp of RSVP submission" },
         "telefono": { "type": "string", "description": "Contact phone number" },

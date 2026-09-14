@@ -7,7 +7,6 @@ export interface Guest {
   cupos_confirmados: number;
   asistira: boolean | null; // null = pending, true = joyfully accepts, false = regretfully declines
   asistentes_nombres?: string[];
-  comentarios_dieta?: string;
   mensaje_novios?: string;
   fecha_confirmacion?: string;
   telefono?: string;
@@ -38,6 +37,5 @@ export interface AdminMetrics {
   cuposConfirmados: number;
   declinadosCount: number;
   pendientesCount: number;
-  conAlergiasCount: number;
   porcentajeConfirmacion: number;
 }

@@ -1,0 +1,19 @@
+{
+  "rules": {
+    "guests": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "guestDirectory": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "guestResponses": {
+      ".read": "auth != null",
+      "$guestId": {
+        ".write": "auth != null || !data.exists()",
+        ".validate": "newData.hasChildren(['confirmado', 'asistira', 'cupos_confirmados', 'asistentes_nombres', 'fecha_confirmacion']) && newData.child('confirmado').val() == true && newData.child('asistira').isBoolean() && newData.child('cupos_confirmados').isNumber()"
+      }
+    }
+  }
+}

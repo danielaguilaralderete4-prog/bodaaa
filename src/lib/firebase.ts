@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getDatabase } from 'firebase/database';
 import firebaseConfigData from '../../firebase-applet-config.json';
 
 const firebaseConfig = {
@@ -14,6 +14,7 @@ const firebaseConfig = {
 
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-
-// The standard Firebase project uses its default Firestore database.
-export const db = getFirestore(app);
+export const realtimeDb = getDatabase(
+  app,
+  'https://invitacion--matrimonio-default-rtdb.firebaseio.com'
+);

@@ -43,7 +43,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateISO })
   if (timeLeft.isPast) {
     return (
       <div id="countdown-container" className="text-center py-4">
-        <p className="font-serif-display text-2xl text-[#5A5A40] italic">
+        <p className="font-serif-display text-2xl text-[#18243D] italic">
           ¡Hoy es el gran día de nuestra boda!
         </p>
       </div>
@@ -59,11 +59,11 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateISO })
       <div className="flex flex-col items-center px-2 sm:px-4">
         <span
           id="days"
-          className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#333333] tracking-tight"
+          className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#18243D] tracking-tight"
         >
           {String(timeLeft.days).padStart(2, '0')}
         </span>
-        <span className="text-[11px] sm:text-xs font-medium text-[#6B6B56] uppercase tracking-[0.15em] mt-1">
+        <span className="text-[11px] sm:text-xs font-medium text-[#536078] uppercase tracking-[0.15em] mt-1">
           Días
         </span>
       </div>
@@ -72,11 +72,11 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateISO })
       <div className="flex flex-col items-center px-2 sm:px-4">
         <span
           id="hours"
-          className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#333333] tracking-tight"
+          className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#18243D] tracking-tight"
         >
           {String(timeLeft.hours).padStart(2, '0')}
         </span>
-        <span className="text-[11px] sm:text-xs font-medium text-[#6B6B56] uppercase tracking-[0.15em] mt-1">
+        <span className="text-[11px] sm:text-xs font-medium text-[#536078] uppercase tracking-[0.15em] mt-1">
           Horas
         </span>
       </div>
@@ -85,11 +85,11 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateISO })
       <div className="flex flex-col items-center px-2 sm:px-4">
         <span
           id="mins"
-          className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#333333] tracking-tight"
+          className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#18243D] tracking-tight"
         >
           {String(timeLeft.minutes).padStart(2, '0')}
         </span>
-        <span className="text-[11px] sm:text-xs font-medium text-[#6B6B56] uppercase tracking-[0.15em] mt-1">
+        <span className="text-[11px] sm:text-xs font-medium text-[#536078] uppercase tracking-[0.15em] mt-1">
           Min
         </span>
       </div>
@@ -98,11 +98,11 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetDateISO })
       <div className="flex flex-col items-center px-2 sm:px-4">
         <span
           id="secs"
-          className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#8D8741] tracking-tight"
+          className="font-serif-display text-3xl sm:text-4xl md:text-5xl font-semibold text-[#B89A62] tracking-tight"
         >
           {String(timeLeft.seconds).padStart(2, '0')}
         </span>
-        <span className="text-[11px] sm:text-xs font-medium text-[#6B6B56] uppercase tracking-[0.15em] mt-1">
+        <span className="text-[11px] sm:text-xs font-medium text-[#536078] uppercase tracking-[0.15em] mt-1">
           Seg
         </span>
       </div>

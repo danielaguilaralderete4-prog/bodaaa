@@ -10,7 +10,6 @@ import {
   RotateCcw,
   Sparkles,
   Send,
-  Utensils,
   Phone,
   MessageSquare,
   Lock,
@@ -33,7 +32,6 @@ export const RSVPSection: React.FC = () => {
   const [attending, setAttending] = useState<boolean>(true);
   const [guestCount, setGuestCount] = useState<number>(1);
   const [attendeeNames, setAttendeeNames] = useState<string[]>(['']);
-  const [dietaryNotes, setDietaryNotes] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loveNote, setLoveNote] = useState('');
 
@@ -85,7 +83,6 @@ export const RSVPSection: React.FC = () => {
         setGuestCount(Math.min(guest.cupos_totales, 1));
         setAttendeeNames([guest.nombre_principal]);
       }
-      if (guest.comentarios_dieta) setDietaryNotes(guest.comentarios_dieta);
       if (guest.mensaje_novios) setLoveNote(guest.mensaje_novios);
     } else {
       setAttending(true);
@@ -96,7 +93,6 @@ export const RSVPSection: React.FC = () => {
         initialNames.push('');
       }
       setAttendeeNames(initialNames);
-      setDietaryNotes(guest.comentarios_dieta || '');
       setLoveNote(guest.mensaje_novios || '');
     }
   };
@@ -182,7 +178,6 @@ export const RSVPSection: React.FC = () => {
             : attending
             ? [selectedGuest.nombre_principal]
             : [],
-        comentarios_dieta: dietaryNotes.trim(),
         mensaje_novios: loveNote.trim(),
       });
 
@@ -207,7 +202,6 @@ export const RSVPSection: React.FC = () => {
     setAttending(true);
     setGuestCount(1);
     setAttendeeNames(['']);
-    setDietaryNotes('');
     setPhoneNumber('');
     setLoveNote('');
     setErrorMessage(null);
@@ -217,38 +211,38 @@ export const RSVPSection: React.FC = () => {
     <section id="rsvp" className="py-20 sm:py-28 px-4 sm:px-6 max-w-5xl mx-auto">
       {/* Section Header */}
       <div className="flex flex-col items-center text-center max-w-2xl mx-auto mb-12">
-        <div className="w-12 h-12 rounded-full bg-[#EAE7DC] flex items-center justify-center mb-4 text-[#8D8741]">
+        <div className="w-12 h-12 rounded-full bg-[#E8DFCF] flex items-center justify-center mb-4 text-[#B89A62]">
           <Mail className="w-5 h-5" />
         </div>
-        <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D8741] mb-2">
+        <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#B89A62] mb-2">
           Confirmación de Asistencia
         </span>
         <h2 className="font-serif-display text-3xl sm:text-4xl text-[#333333] font-bold mb-4">
           Confirmar Asistencia
         </h2>
         <p className="text-base text-[#6B6B56] leading-relaxed">
-          Para nosotros es fundamental contar con tu presencia. Por favor confirma antes del{' '}
+          Para nosotros es fundamental contar con su presencia. Por favor confirma antes del{' '}
           <strong className="text-[#5A5A40] font-semibold">{WEDDING_DETAILS.rsvpDeadline}</strong>{' '}
-          para reservar tus cupos en nuestro gran día.
+          para reservar sus cupos en nuestro gran día.
         </p>
         <div className="w-24 h-[1.5px] bg-gradient-to-r from-transparent via-[#BC986A] to-transparent mt-6" />
       </div>
 
       {/* Main RSVP Card */}
-      <div className="bg-[#FDFCF0] border border-[#E0D8C3] rounded-3xl p-6 sm:p-10 md:p-12 shadow-sm relative overflow-hidden">
-        <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[#EAE7DC]/45 pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-52 h-52 rounded-full border border-[#BC986A]/20 pointer-events-none" />
+      <div className="bg-[#F8F4EC] border border-[#D8C29A] rounded-3xl p-6 sm:p-10 md:p-12 shadow-sm relative overflow-hidden">
+        <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[#E8DFCF]/45 pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-52 h-52 rounded-full border border-[#B89A62]/20 pointer-events-none" />
         <div className="relative max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <div className="mx-auto w-14 h-14 rounded-2xl bg-[#F7F3E9] border border-[#BC986A]/50 flex items-center justify-center text-[#8D8741] shadow-sm">
+            <div className="mx-auto w-14 h-14 rounded-2xl bg-[#FBF8F1] border border-[#B89A62]/50 flex items-center justify-center text-[#B89A62] shadow-sm">
               <Mail className="w-6 h-6" />
             </div>
             <div className="w-16 h-px bg-gradient-to-r from-transparent via-[#BC986A] to-transparent mx-auto mt-5 mb-4" />
             <p className="text-xs uppercase tracking-[0.2em] text-[#8D8741] font-semibold">
-              Tus cupos están reservados
+              Sus cupos están reservados
             </p>
             <p className="text-sm text-[#6B6B56] leading-relaxed mt-2">
-              Busca tu nombre para confirmar tu asistencia y disfrutar juntos de este día tan especial.
+              Busca su nombre para confirmar su asistencia y disfrutar juntos de este día tan especial.
             </p>
           </div>
 
@@ -306,12 +300,6 @@ export const RSVPSection: React.FC = () => {
                         </ul>
                       </div>
                     )}
-                  {confirmedData.guest.comentarios_dieta && (
-                    <div className="pb-2 border-b border-[#E0D8C3]">
-                      <span className="text-[#6B6B56] block">Alergias / Dietas:</span>
-                      <span className="italic text-[#333333]">{confirmedData.guest.comentarios_dieta}</span>
-                    </div>
-                  )}
                   {confirmedData.guest.mensaje_novios && (
                     <div className="pt-1">
                       <span className="text-[#6B6B56] block">Mensaje:</span>
@@ -342,7 +330,7 @@ export const RSVPSection: React.FC = () => {
                     </h3>
                   </div>
                   <p className="text-xs sm:text-sm text-[#6B6B56] leading-relaxed mb-4">
-                    Escribe tu nombre y apellido (o apellido de familia) para ver tus cupos asignados:
+                    Escribe tu nombre y apellido (o apellido de familia) para ver sus cupos asignados:
                   </p>
 
                   <form onSubmit={handleManualSearchSubmit} className="space-y-3">
@@ -363,7 +351,7 @@ export const RSVPSection: React.FC = () => {
                       {filteredSuggestions.length > 0 && isTyping && (
                         <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-[#E0D8C3] rounded-2xl shadow-xl z-20 overflow-hidden">
                           <div className="px-3.5 py-1.5 bg-[#F7F3E9] text-[10px] uppercase font-bold text-[#6B6B56] tracking-wider">
-                            Selecciona tu invitación:
+                            Selecciona su invitación:
                           </div>
                           {filteredSuggestions.map((g) => (
                             <button
@@ -390,7 +378,7 @@ export const RSVPSection: React.FC = () => {
                         <div>
                           <p className="font-semibold">No encontramos ese nombre en la lista.</p>
                           <p className="mt-0.5 text-amber-800">
-                            Por favor escribe tu primer nombre y apellido, o contáctanos por WhatsApp para ayudarte.
+                            Por favor escriba su primer nombre y apellido, o contáctenos por WhatsApp para ayudarle.
                           </p>
                         </div>
                       </div>
@@ -448,7 +436,7 @@ export const RSVPSection: React.FC = () => {
                 {/* 1. ¿Podrás asistir? */}
                 <div>
                   <label className="block text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-2.5">
-                    1. ¿Podrás acompañarnos en nuestro matrimonio? <span className="text-[#8D8741]">*</span>
+                    1. ¿Podrá acompañarnos en nuestro matrimonio? <span className="text-[#8D8741]">*</span>
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <label
@@ -580,20 +568,6 @@ export const RSVPSection: React.FC = () => {
                       ))}
                     </div>
 
-                    {/* Alergias / Dietas */}
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-1.5 flex items-center gap-1.5">
-                        <Utensils className="w-3.5 h-3.5 text-[#8D8741]" />
-                        <span>4. Restricciones Alimentarias / Alergias (Opcional):</span>
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={dietaryNotes}
-                        onChange={(e) => setDietaryNotes(e.target.value)}
-                        placeholder="Ej: Vegetariano, Vegano, Celíaco (Sin Gluten), Alergia a mariscos/frutos secos..."
-                        className="w-full bg-white border border-[#E0D8C3] focus:border-[#5A5A40] focus:ring-1 focus:ring-[#5A5A40] rounded-xl p-3 text-sm text-[#333333] outline-none resize-none"
-                      />
-                    </div>
                   </div>
                 )}
 
@@ -601,7 +575,7 @@ export const RSVPSection: React.FC = () => {
                 <div>
                   <label className="block text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-1.5 flex items-center gap-1.5">
                     <MessageSquare className="w-3.5 h-3.5 text-[#8D8741]" />
-                    <span>{attending ? '5.' : '2.'} Mensaje de Felicitaciones para Bárbara & Daniel:</span>
+                    <span>{attending ? '4.' : '2.'} Mensaje de Felicitaciones para Bárbara & Daniel:</span>
                   </label>
                   <textarea
                     rows={2}

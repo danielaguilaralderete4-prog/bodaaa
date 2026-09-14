@@ -1,14 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import {
-  collection,
-  doc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  onSnapshot,
-  writeBatch,
-} from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { onValue, push, ref, remove, set, update } from 'firebase/database';
+import { auth, realtimeDb } from '../lib/firebase';
 import { Guest, AdminMetrics } from '../types';
 import { INITIAL_GUESTS } from '../data/initialGuests';
 
@@ -26,7 +19,6 @@ interface GuestContextType {
       asistira: boolean;
       cupos_confirmados: number;
       asistentes_nombres: string[];
-      comentarios_dieta: string;
       mensaje_novios?: string;
     }
   ) => Promise<{ success: boolean; message: string; guest?: Guest }>;
@@ -35,7 +27,6 @@ interface GuestContextType {
     asistira: boolean;
     cupos_confirmados: number;
     asistentes_nombres: string[];
-    comentarios_dieta: string;
     mensaje_novios?: string;
     telefono?: string;
   }) => Promise<{ success: boolean; message: string; guest: Guest }>;
@@ -49,72 +40,77 @@ interface GuestContextType {
   setLastConfirmedGuest: (guest: Guest | null) => void;
 }
 
-const STORAGE_KEY = 'barbara_daniel_guests_v1';
 const GuestContext = createContext<GuestContextType | undefined>(undefined);
+type GuestDirectoryEntry = Pick<Guest, 'codigo_invitacion' | 'nombre_principal' | 'cupos_totales'>;
+
+const toDirectoryEntry = (guest: Guest): GuestDirectoryEntry => ({
+  codigo_invitacion: guest.codigo_invitacion,
+  nombre_principal: guest.nombre_principal,
+  cupos_totales: guest.cupos_totales,
+});
 
 export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [guests, setGuests] = useState<Guest[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch {
-      // ignore
-    }
-    return INITIAL_GUESTS;
-  });
+  const [guests, setGuests] = useState<Guest[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isFirebaseConnected, setIsFirebaseConnected] = useState<boolean>(false);
   const [lastConfirmedGuest, setLastConfirmedGuest] = useState<Guest | null>(null);
 
-  // Real-time Firestore sync with fallback to initial data
+  // The private guest list is only subscribed to after Firebase Authentication
+  // confirms that the current visitor is a member of the couple's account.
   useEffect(() => {
-    const guestsColRef = collection(db, 'guests');
+    let unsubscribeData: (() => void) | undefined;
+    let privateGuests: Guest[] = [];
+    let responses: Record<string, Partial<Guest>> = {};
+    const publish = () =>
+      setGuests(privateGuests.map((guest) => ({ ...guest, ...(responses[guest.id] || {}) })));
 
-    const unsubscribe = onSnapshot(
-      guestsColRef,
-      async (snapshot) => {
-        setIsLoading(false);
-        setIsFirebaseConnected(true);
-
-        if (snapshot.empty) {
-          // Seed initial guests into Firestore in bulk
-          try {
-            const batch = writeBatch(db);
-            INITIAL_GUESTS.forEach((guest) => {
-              const docRef = doc(db, 'guests', guest.id);
-              batch.set(docRef, guest);
-            });
-            await batch.commit();
-            setGuests(INITIAL_GUESTS);
-          } catch (seedErr) {
-            console.error('Error seeding initial guests to Firestore:', seedErr);
-            setGuests(INITIAL_GUESTS);
-          }
-        } else {
-          const loadedGuests = snapshot.docs.map((docSnap) => {
-            const data = docSnap.data() as Guest;
-            return {
-              ...data,
-              id: docSnap.id,
-            };
-          });
-          setGuests(loadedGuests);
-          try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedGuests));
-          } catch {
-            // ignore
-          }
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      unsubscribeData?.();
+      setIsLoading(true);
+      setGuests([]);
+      const path = user ? 'guests' : 'guestDirectory';
+      unsubscribeData = onValue(
+        ref(realtimeDb, path),
+        (snapshot) => {
+          setIsLoading(false);
+          setIsFirebaseConnected(true);
+          const data = snapshot.val() as Record<string, Guest | GuestDirectoryEntry> | null;
+          privateGuests = data
+            ? Object.entries(data).map(([id, guest]) => ({ ...guest, id } as Guest))
+            : [];
+          publish();
+        },
+        (error) => {
+          console.warn('Realtime Database subscription error:', error);
+          setIsLoading(false);
+          setIsFirebaseConnected(false);
         }
-      },
-      (error) => {
-        console.warn('Firestore subscription error, using local storage cache:', error);
-        setIsLoading(false);
-        setIsFirebaseConnected(false);
+      );
+      if (user) {
+        const responseUnsubscribe = onValue(ref(realtimeDb, 'guestResponses'), (snapshot) => {
+          const rawResponses =
+            (snapshot.val() as Record<string, (Partial<Guest> & { guest_id?: string }) | null> | null) ||
+            {};
+          responses = {};
+          Object.values(rawResponses).forEach((response) => {
+            if (response?.guest_id) {
+              responses[response.guest_id] = response;
+            }
+          });
+          publish();
+        });
+        const original = unsubscribeData;
+        unsubscribeData = () => {
+          original();
+          responseUnsubscribe();
+        };
       }
-    );
-
-    return () => unsubscribe();
+    });
+    return () => {
+      unsubscribeAuth();
+      unsubscribeData?.();
+    };
   }, []);
 
   // Compute live admin statistics
@@ -129,10 +125,6 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       (acc, g) => acc + (g.cupos_confirmados || 0),
       0
     );
-    const conAlergiasCount = guests.filter(
-      (g) => g.comentarios_dieta && g.comentarios_dieta.trim().length > 0 && g.asistira === true
-    ).length;
-
     const porcentajeConfirmacion =
       cuposTotales > 0 ? Math.round((cuposConfirmados / cuposTotales) * 100) : 0;
 
@@ -143,7 +135,6 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       cuposConfirmados,
       declinadosCount: declinadosList.length,
       pendientesCount: pendientesList.length,
-      conAlergiasCount,
       porcentajeConfirmacion,
     };
   }, [guests]);
@@ -183,7 +174,6 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     asistira: boolean;
     cupos_confirmados: number;
     asistentes_nombres: string[];
-    comentarios_dieta: string;
     mensaje_novios?: string;
     telefono?: string;
   }) => {
@@ -198,17 +188,20 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         asistira: data.asistira,
         cupos_confirmados: data.asistira ? data.cupos_confirmados : 0,
         asistentes_nombres: data.asistira ? data.asistentes_nombres : [],
-        comentarios_dieta: data.comentarios_dieta || '',
         mensaje_novios: data.mensaje_novios || '',
         telefono: data.telefono || existing.telefono || '',
         fecha_confirmacion: new Date().toISOString(),
       };
 
-      try {
-        await setDoc(doc(db, 'guests', existing.id), updatedOrNewGuest, { merge: true });
-      } catch (err) {
-        console.warn('Fallback local update:', err);
-      }
+      await set(push(ref(realtimeDb, 'guestResponses')), {
+        guest_id: existing.id,
+        confirmado: true,
+        asistira: data.asistira,
+        cupos_confirmados: data.asistira ? data.cupos_confirmados : 0,
+        asistentes_nombres: data.asistira ? data.asistentes_nombres : [],
+        mensaje_novios: data.mensaje_novios || '',
+        fecha_confirmacion: updatedOrNewGuest.fecha_confirmacion,
+      });
       setGuests((prev) => prev.map((g) => (g.id === existing.id ? updatedOrNewGuest : g)));
     } else {
       const generatedCode = `BD-${Math.floor(100 + Math.random() * 900)}`;
@@ -222,19 +215,16 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         asistira: data.asistira,
         cupos_confirmados: data.asistira ? data.cupos_confirmados : 0,
         asistentes_nombres: data.asistira ? data.asistentes_nombres : [],
-        comentarios_dieta: data.comentarios_dieta || '',
         mensaje_novios: data.mensaje_novios || '',
         telefono: data.telefono || '',
         categoria: 'General',
         fecha_confirmacion: new Date().toISOString(),
       };
 
-      try {
-        await setDoc(doc(db, 'guests', newId), updatedOrNewGuest);
-      } catch (err) {
-        console.warn('Fallback local add:', err);
-      }
-      setGuests((prev) => [updatedOrNewGuest, ...prev]);
+      await set(push(ref(realtimeDb, 'guestResponses')), {
+        ...updatedOrNewGuest,
+        guest_id: newId,
+      });
     }
 
     setLastConfirmedGuest(updatedOrNewGuest);
@@ -254,7 +244,6 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       asistira: boolean;
       cupos_confirmados: number;
       asistentes_nombres: string[];
-      comentarios_dieta: string;
       mensaje_novios?: string;
     }
   ) => {
@@ -276,16 +265,19 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       asistira: data.asistira,
       cupos_confirmados: data.asistira ? data.cupos_confirmados : 0,
       asistentes_nombres: data.asistira ? data.asistentes_nombres : [],
-      comentarios_dieta: data.comentarios_dieta || '',
       mensaje_novios: data.mensaje_novios || '',
       fecha_confirmacion: new Date().toISOString(),
     };
 
-    try {
-      await setDoc(doc(db, 'guests', guestId), updatedGuest, { merge: true });
-    } catch (err) {
-      console.warn('Fallback local update:', err);
-    }
+    await set(push(ref(realtimeDb, 'guestResponses')), {
+      guest_id: guestId,
+      confirmado: true,
+      asistira: data.asistira,
+      cupos_confirmados: data.asistira ? data.cupos_confirmados : 0,
+      asistentes_nombres: data.asistira ? data.asistentes_nombres : [],
+      mensaje_novios: data.mensaje_novios || '',
+      fecha_confirmacion: updatedGuest.fecha_confirmacion,
+    });
 
     setGuests((prev) => prev.map((g) => (g.id === guestId ? updatedGuest : g)));
     setLastConfirmedGuest(updatedGuest);
@@ -315,22 +307,22 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       asistentes_nombres: [],
     };
 
-    try {
-      await setDoc(doc(db, 'guests', newId), newGuest);
-    } catch (err) {
-      console.warn('Fallback local add:', err);
-    }
+    await update(ref(realtimeDb), {
+      [`guests/${newId}`]: newGuest,
+      [`guestDirectory/${newId}`]: toDirectoryEntry(newGuest),
+    });
 
-    setGuests((prev) => [newGuest, ...prev]);
     return { success: true, message: 'Invitado agregado exitosamente.' };
   };
 
   const updateGuest = async (id: string, updates: Partial<Guest>) => {
-    try {
-      await updateDoc(doc(db, 'guests', id), updates);
-    } catch (err) {
-      console.warn('Fallback local update:', err);
-    }
+    const current = guests.find((guest) => guest.id === id);
+    await update(ref(realtimeDb), {
+      [`guests/${id}`]: updates,
+      ...(current
+        ? { [`guestDirectory/${id}`]: toDirectoryEntry({ ...current, ...updates }) }
+        : {}),
+    });
 
     setGuests((prev) =>
       prev.map((g) => {
@@ -344,11 +336,11 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const deleteGuest = async (id: string) => {
-    try {
-      await deleteDoc(doc(db, 'guests', id));
-    } catch (err) {
-      console.warn('Fallback local delete:', err);
-    }
+    await update(ref(realtimeDb), {
+      [`guests/${id}`]: null,
+      [`guestDirectory/${id}`]: null,
+      [`guestResponses/${id}`]: null,
+    });
     setGuests((prev) => prev.filter((g) => g.id !== id));
   };
 
@@ -358,15 +350,13 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       asistira: null,
       cupos_confirmados: 0,
       asistentes_nombres: [],
-      comentarios_dieta: '',
       mensaje_novios: '',
     };
 
-    try {
-      await updateDoc(doc(db, 'guests', id), updates);
-    } catch (err) {
-      console.warn('Fallback local reset:', err);
-    }
+    await update(ref(realtimeDb), {
+      [`guests/${id}`]: updates,
+      [`guestResponses/${id}`]: null,
+    });
 
     setGuests((prev) =>
       prev.map((g) => (g.id === id ? { ...g, ...updates, fecha_confirmacion: undefined } : g))
@@ -374,20 +364,14 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const resetAllToDefault = async () => {
-    try {
-      const batch = writeBatch(db);
-      // Delete current
-      guests.forEach((g) => {
-        batch.delete(doc(db, 'guests', g.id));
-      });
-      // Insert initial
-      INITIAL_GUESTS.forEach((g) => {
-        batch.set(doc(db, 'guests', g.id), g);
-      });
-      await batch.commit();
-    } catch (err) {
-      console.warn('Fallback local reset all:', err);
-    }
+    const seeded = Object.fromEntries(INITIAL_GUESTS.map((guest) => [guest.id, guest]));
+    await update(ref(realtimeDb), {
+      guests: seeded,
+      guestDirectory: Object.fromEntries(
+        INITIAL_GUESTS.map((guest) => [guest.id, toDirectoryEntry(guest)])
+      ),
+      guestResponses: null,
+    });
     setGuests(INITIAL_GUESTS);
   };
 
@@ -402,7 +386,6 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       'Asiste',
       'Cupos Confirmados',
       'Nombres Asistentes',
-      'Restricciones Alimentarias / Alergias',
       'Mesa',
       'Teléfono',
       'Fecha Confirmación',
@@ -419,7 +402,6 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       g.asistira === true ? 'SÍ' : g.asistira === false ? 'NO' : 'Pendiente',
       g.cupos_confirmados,
       `"${(g.asistentes_nombres || []).join('; ').replace(/"/g, '""')}"`,
-      `"${(g.comentarios_dieta || '').replace(/"/g, '""')}"`,
       `"${(g.mesa_asignada || 'Por asignar').replace(/"/g, '""')}"`,
       `"${(g.telefono || '').replace(/"/g, '""')}"`,
       `"${(g.fecha_confirmacion || '').replace(/"/g, '""')}"`,

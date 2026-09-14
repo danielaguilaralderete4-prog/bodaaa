@@ -75,7 +75,7 @@ export default function App() {
 
   return (
     <GuestProvider>
-      <div className="min-h-screen bg-[#FDFCF0] text-[#4A4A4A] font-sans antialiased selection:bg-[#EAE7DC] selection:text-[#5A5A40] relative">
+      <div className="min-h-screen bg-[#F8F4EC] text-[#3B3B3B] font-sans antialiased selection:bg-[#E8DFCF] selection:text-[#18243D] relative">
         {/* Floating Music Button visible at bottom right */}
         <FloatingMusicButton
           isPlaying={isPlayingMusic}

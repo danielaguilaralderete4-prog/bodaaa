@@ -21,7 +21,6 @@ import {
   Phone,
   Layers,
   ArrowUpDown,
-  Utensils,
   Check,
   Copy,
   Share2,
@@ -47,7 +46,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<
-    'all' | 'confirmed' | 'pending' | 'declined' | 'allergies'
+    'all' | 'confirmed' | 'pending' | 'declined'
   >('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
@@ -100,9 +99,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     if (filterStatus === 'confirmed') matchesStatus = g.confirmado && g.asistira === true;
     if (filterStatus === 'pending') matchesStatus = !g.confirmado;
     if (filterStatus === 'declined') matchesStatus = g.confirmado && g.asistira === false;
-    if (filterStatus === 'allergies')
-      matchesStatus =
-        Boolean(g.comentarios_dieta && g.comentarios_dieta.trim().length > 0) && g.asistira === true;
 
     // Category filter
     let matchesCat = true;
@@ -111,7 +107,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     return matchesSearch && matchesStatus && matchesCat;
   });
 
-  const handleAddSubmit = (e: React.FormEvent) => {
+  const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim()) {
       setFormError('El nombre o familia del invitado es requerido.');
@@ -121,7 +117,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     // Auto-generate internal unique code
     const autoCode = `INV-${Date.now().toString(36).toUpperCase()}`;
 
-    const res = addGuest({
+    const res = await addGuest({
       codigo_invitacion: autoCode,
       nombre_principal: newName.trim(),
       cupos_totales: Number(newSpots),
@@ -129,7 +125,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
       cupos_confirmados: 0,
       asistira: null,
       asistentes_nombres: [],
-      comentarios_dieta: '',
       telefono: newPhone.trim(),
       categoria: newCategory,
       mesa_asignada: newTable.trim(),
@@ -146,17 +141,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     }
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
+  const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingGuest) return;
 
-    updateGuest(editingGuest.id, {
+    await updateGuest(editingGuest.id, {
       nombre_principal: editingGuest.nombre_principal,
       cupos_totales: Number(editingGuest.cupos_totales),
       categoria: editingGuest.categoria,
       telefono: editingGuest.telefono,
       mesa_asignada: editingGuest.mesa_asignada,
-      comentarios_dieta: editingGuest.comentarios_dieta,
     });
 
     setEditingGuest(null);
@@ -294,25 +288,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             </div>
           </div>
 
-          {/* Dietary Restrictions Card */}
-          <div className="bg-[#F7F3E9] p-5 rounded-2xl border border-[#E0D8C3] shadow-sm relative overflow-hidden group">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs uppercase tracking-wider font-semibold text-[#8D8741] mb-1">
-                  Alergias / Dietas
-                </p>
-                <p className="font-serif-display text-3xl sm:text-4xl font-bold text-[#5A5A40]">
-                  {metrics.conAlergiasCount}
-                </p>
-                <p className="text-[11px] text-[#6B6B56] mt-1 font-medium">
-                  Menús especiales catering
-                </p>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-[#EAE7DC] text-[#8D8741] flex items-center justify-center">
-                <Utensils className="w-5 h-5" />
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Search, Filter Bar and Table */}
@@ -381,16 +356,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               >
                 No Asisten ({metrics.declinadosCount})
               </button>
-              <button
-                onClick={() => setFilterStatus('allergies')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  filterStatus === 'allergies'
-                    ? 'bg-[#5A5A40] text-white shadow-sm'
-                    : 'bg-white border border-[#E0D8C3] text-[#5A5A40] hover:bg-[#EAE7DC]'
-                }`}
-              >
-                Alergias ({metrics.conAlergiasCount})
-              </button>
             </div>
           </div>
 
@@ -405,7 +370,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   <th className="py-3.5 px-4 font-bold text-center">Cupos Asignados</th>
                   <th className="py-3.5 px-4 font-bold text-center">Confirmados</th>
                   <th className="py-3.5 px-4 font-bold">Estado RSVP</th>
-                  <th className="py-3.5 px-4 font-bold">Alergias & Asistentes</th>
+                  <th className="py-3.5 px-4 font-bold">Asistentes</th>
                   <th className="py-3.5 px-4 font-bold text-right">Acciones</th>
                 </tr>
               </thead>
@@ -513,13 +478,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                           <p className="text-xs font-medium text-[#333333] truncate">
                             Asistentes: {g.asistentes_nombres.join(', ')}
                           </p>
-                        )}
-                        {g.comentarios_dieta ? (
-                          <p className="text-xs text-[#5A5A40] bg-[#EAE7DC] p-1.5 rounded-lg border border-[#E0D8C3] mt-1 italic">
-                            {g.comentarios_dieta}
-                          </p>
-                        ) : (
-                          <span className="text-gray-400 text-xs">-</span>
                         )}
                       </td>
 
@@ -860,23 +818,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-1">
-                  Restricciones / Dietas
-                </label>
-                <textarea
-                  rows={2}
-                  value={editingGuest.comentarios_dieta || ''}
-                  onChange={(e) =>
-                    setEditingGuest({
-                      ...editingGuest,
-                      comentarios_dieta: e.target.value,
-                    })
-                  }
-                  className="w-full bg-white border border-[#E0D8C3] rounded-xl p-2.5 text-sm focus:border-[#5A5A40] outline-none"
-                />
-              </div>
-
               <div className="flex justify-end gap-3 pt-4 border-t border-[#E0D8C3]">
                 <button
                   type="button"
@@ -969,14 +910,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                       </p>
                     </div>
                   )}
-                <div className="flex justify-between items-start pt-1">
-                  <span className="text-xs uppercase tracking-wider text-[#6B6B56] font-semibold w-1/3">
-                    Alergias / Notas
-                  </span>
-                  <span className="text-xs text-[#333333] text-right w-2/3 italic">
-                    {simulatedEmailGuest.comentarios_dieta || 'Sin restricciones especiales indicadas.'}
-                  </span>
-                </div>
               </div>
 
               <div className="text-[11px] text-[#6B6B56]">

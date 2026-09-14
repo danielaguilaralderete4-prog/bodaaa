@@ -2,28 +2,28 @@
 
 @layer base {
   :root {
-    --primary: #5A5A40;
-    --primary-container: #EAE7DC;
+    --primary: #18243D;
+    --primary-container: #E8DFCF;
     --on-primary: #ffffff;
-    --on-primary-container: #5A5A40;
-    --surface: #FDFCF0;
+    --on-primary-container: #18243D;
+    --surface: #F8F4EC;
     --surface-container-lowest: #ffffff;
-    --surface-container-low: #F7F3E9;
-    --surface-container: #EAE7DC;
-    --surface-container-high: #E0D8C3;
-    --on-surface: #333333;
-    --on-surface-variant: #5A5A40;
-    --outline-variant: #E0D8C3;
-    --tertiary: #8D8741;
-    --tertiary-fixed-dim: #BC986A;
-    --secondary: #BC986A;
+    --surface-container-low: #FBF8F1;
+    --surface-container: #E8DFCF;
+    --surface-container-high: #D8C29A;
+    --on-surface: #252525;
+    --on-surface-variant: #34415C;
+    --outline-variant: #D8C29A;
+    --tertiary: #B89A62;
+    --tertiary-fixed-dim: #C6AA76;
+    --secondary: #B89A62;
   }
 }
 
 body {
   font-family: 'DM Sans', Georgia, sans-serif;
-  background-color: #FDFCF0;
-  color: #4A4A4A;
+  background-color: #F8F4EC;
+  color: #3B3B3B;
   scroll-behavior: smooth;
 }
 
@@ -53,12 +53,12 @@ h1, h2, h3, .font-serif-display {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F7F3E9;
+  background: #FBF8F1;
 }
 ::-webkit-scrollbar-thumb {
-  background: #D8C3A5;
+  background: #D8C29A;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #8D8741;
+  background: #B89A62;
 }

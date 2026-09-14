@@ -19,8 +19,8 @@ export const HeroSection: React.FC = () => {
           }}
         />
         {/* Natural Tones Soft Overlays */}
-        <div className="absolute inset-0 bg-[#FDFCF0]/8" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FDFCF0]/25 via-transparent to-[#FDFCF0]/35" />
+        <div className="absolute inset-0 bg-[#F8F4EC]/8" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#F8F4EC]/25 via-transparent to-[#F8F4EC]/35" />
       </div>
 
       {/* Main Hero Card Container */}
@@ -35,7 +35,7 @@ export const HeroSection: React.FC = () => {
         </p>
 
         {/* Elegant Natural Gold Divider */}
-        <div className="w-20 h-[1.5px] bg-gradient-to-r from-transparent via-[#8D8741] to-transparent my-2" />
+        <div className="w-20 h-[1.5px] bg-gradient-to-r from-transparent via-[#B89A62] to-transparent my-2" />
 
         {/* Date & Location Badges */}
         <div className="relative top-3 sm:top-[28rem] sm:z-20 flex flex-wrap items-center justify-center gap-4 rounded-full bg-[#FDFCF0]/35 px-4 py-2 text-[#111111] my-4 text-sm sm:text-base shadow-sm backdrop-blur-[2px]">
@@ -43,7 +43,7 @@ export const HeroSection: React.FC = () => {
             <Calendar className="w-4 h-4 text-[#111111]" />
             <span className="[text-shadow:0_1px_2px_rgba(255,255,255,0.5)]">{WEDDING_DETAILS.weddingDateFormatted}</span>
           </div>
-          <span className="text-[#D8C3A5] hidden sm:inline">&bull;</span>
+          <span className="text-[#D8C29A] hidden sm:inline">&bull;</span>
           <div className="flex items-center gap-1.5 font-semibold text-xs sm:text-sm tracking-wide text-[#111111]">
             <MapPin className="w-3.5 h-3.5 text-[#111111]" />
             <span className="[text-shadow:0_1px_2px_rgba(255,255,255,0.5)]">Osorno, Los Lagos, Chile</span>
@@ -51,14 +51,14 @@ export const HeroSection: React.FC = () => {
         </div>
 
         {/* Countdown Floating Card */}
-        <div className="w-full max-w-lg mt-[28rem] sm:mt-[28rem] rounded-[2rem] border border-[#B9A66A]/70 bg-[#FDFCF0]/95 p-2 shadow-[0_18px_45px_rgba(63,58,34,0.18)] backdrop-blur-md">
-          <div className="rounded-[1.65rem] border border-[#D8C79A]/70 px-4 py-5 sm:px-6 sm:py-6">
+        <div className="w-full max-w-lg mt-[28rem] sm:mt-[28rem] rounded-[2rem] border border-[#B89A62]/70 bg-[#F8F4EC]/95 p-2 shadow-[0_18px_45px_rgba(24,36,61,0.18)] backdrop-blur-md">
+          <div className="rounded-[1.65rem] border border-[#D8C29A]/70 px-4 py-5 sm:px-6 sm:py-6">
             <div className="mb-5 flex items-center gap-3">
-              <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#B9A66A]" />
-              <h3 className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#8D8741]">
+              <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#B89A62]" />
+              <h3 className="text-[10px] uppercase tracking-[0.3em] font-semibold text-[#B89A62]">
                 Cuenta Regresiva
               </h3>
-              <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#B9A66A]" />
+              <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#B89A62]" />
             </div>
             <CountdownTimer targetDateISO={WEDDING_DETAILS.weddingDateISO} />
           </div>
@@ -68,13 +68,13 @@ export const HeroSection: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center gap-3.5 mt-12 w-full max-w-md justify-center">
           <a
             href="#rsvp"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-[#5A5A40] text-white hover:bg-[#474732] transition-all shadow-md hover:shadow-lg text-xs uppercase tracking-[0.15em] font-semibold"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-[#18243D] text-white hover:bg-[#283653] transition-all shadow-md hover:shadow-lg text-xs uppercase tracking-[0.15em] font-semibold"
           >
             Confirmar Asistencia (RSVP)
           </a>
           <a
             href="#event"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#F7F3E9] hover:bg-[#EAE7DC] text-[#5A5A40] border border-[#E0D8C3] transition-all text-xs uppercase tracking-[0.15em] font-medium"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#FBF8F1] hover:bg-[#E8DFCF] text-[#18243D] border border-[#D8C29A] transition-all text-xs uppercase tracking-[0.15em] font-medium"
           >
             Ver Detalles del Evento
           </a>
@@ -83,10 +83,10 @@ export const HeroSection: React.FC = () => {
         {/* Scroll indicator */}
         <a
           href="#details"
-          className="mt-8 inline-flex flex-col items-center gap-1 rounded-full border border-[#B9A66A]/70 bg-[#FDFCF0]/80 px-4 py-2 text-[#111111] shadow-[0_6px_18px_rgba(63,58,34,0.12)] backdrop-blur-sm transition-all hover:bg-[#FDFCF0]/95 animate-bounce"
+          className="mt-8 inline-flex flex-col items-center gap-1 rounded-full border border-[#B89A62]/70 bg-[#F8F4EC]/80 px-4 py-2 text-[#111111] shadow-[0_6px_18px_rgba(24,36,61,0.12)] backdrop-blur-sm transition-all hover:bg-[#F8F4EC]/95 animate-bounce"
         >
           <span className="text-[9px] uppercase tracking-[0.2em] font-semibold">Descubrir más</span>
-          <ChevronDown className="w-3.5 h-3.5 text-[#8D8741]" strokeWidth={2.5} />
+          <ChevronDown className="w-3.5 h-3.5 text-[#B89A62]" strokeWidth={2.5} />
         </a>
       </div>
     </section>
