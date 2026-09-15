@@ -38,6 +38,9 @@ export const Footer: React.FC = () => {
           <a href="#rsvp" className="hover:text-[#333333] transition-colors">
             Confirmar Asistencia
           </a>
+          <a href="#music" className="hover:text-[#333333] transition-colors">
+            Playlist
+          </a>
         </div>
 
         <div className="w-32 h-[1.5px] bg-gradient-to-r from-transparent via-[#B89A62] to-transparent" />

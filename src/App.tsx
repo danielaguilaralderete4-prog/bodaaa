@@ -7,6 +7,7 @@ import { EventDetailsSection } from './components/EventDetailsSection';
 import { ProtocolSection } from './components/ProtocolSection';
 import { GiftRegistrySection } from './components/GiftRegistrySection';
 import { RSVPSection } from './components/RSVPSection';
+import { MusicRequestsSection } from './components/MusicRequestsSection';
 import { AdminDashboard } from './components/AdminDashboard';
 import { PasswordModal } from './components/PasswordModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
@@ -97,6 +98,7 @@ export default function App() {
           <ProtocolSection />
           <GiftRegistrySection />
           <RSVPSection />
+          <MusicRequestsSection />
         </main>
 
         {/* Footer */}
