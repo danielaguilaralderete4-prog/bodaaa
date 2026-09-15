@@ -10,7 +10,7 @@ export const ProtocolSection: React.FC = () => {
           <Sparkles className="w-5 h-5" />
         </div>
         <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D8741] mb-2">
-          Protocolo & Recomendaciones
+          Recomendaciones
         </span>
         <h2 className="font-serif-display text-3xl sm:text-4xl text-[#333333] font-semibold mb-4">
           Detalles para su Comodidad
