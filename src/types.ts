@@ -39,3 +39,42 @@ export interface AdminMetrics {
   pendientesCount: number;
   porcentajeConfirmacion: number;
 }
+
+export interface GiftItem {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+  goalAmount: number;
+  currentAmount: number;
+  totalCupos: number;
+  availableCupos: number;
+  pricePerCup: number;
+  active: boolean;
+  sortOrder?: number;
+  createdAt: string;
+}
+
+export interface GiftReservationItem {
+  giftId: string;
+  giftName: string;
+  quantity: number;
+  amount: number;
+}
+
+export interface GiftReservation {
+  id: string;
+  guestName: string;
+  email: string;
+  phone?: string;
+  message?: string;
+  items: GiftReservationItem[];
+  totalAmount: number;
+  status: 'pending' | 'paid' | 'cancelled';
+  createdAt: string;
+  // Mercado Pago fields
+  preferenceId?: string;
+  mpPaymentId?: string;
+  mpOrderId?: string;
+  paidAt?: string;
+}

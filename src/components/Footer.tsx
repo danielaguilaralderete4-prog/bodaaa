@@ -1,7 +1,11 @@
 import React from 'react';
 import { Sparkles } from 'lucide-react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenGiftPage?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenGiftPage }) => {
   return (
     <footer className="bg-[#E8DFCF] border-t border-[#D8C29A] py-14 px-4 sm:px-6 text-center text-[#536078]">
       <div className="max-w-4xl mx-auto flex flex-col items-center space-y-6">
@@ -32,9 +36,13 @@ export const Footer: React.FC = () => {
           <a href="#protocol" className="hover:text-[#333333] transition-colors">
             Protocolo
           </a>
-          <a href="#gifts" className="hover:text-[#333333] transition-colors">
+          <button
+            type="button"
+            onClick={onOpenGiftPage}
+            className="hover:text-[#333333] transition-colors"
+          >
             Lista de Novios
-          </a>
+          </button>
           <a href="#rsvp" className="hover:text-[#333333] transition-colors">
             Confirmar Asistencia
           </a>

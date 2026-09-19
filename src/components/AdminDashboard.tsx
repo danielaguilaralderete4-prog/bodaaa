@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGuests } from '../context/GuestContext';
-import { Guest } from '../types';
+import { useGiftContext } from '../context/GiftContext';
+import { Guest, GiftItem, GiftReservation } from '../types';
 import {
   Users,
   CheckCircle,
@@ -26,7 +27,23 @@ import {
   Share2,
   ShieldCheck,
   ExternalLink,
+  Gift,
+  Plus,
+  Image,
+  ToggleLeft,
+  ToggleRight,
+  CreditCard,
+  PackageCheck,
+  TrendingUp,
+  AlertCircle,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
+
+const formatCLP = (v: number) =>
+  new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(v);
+
 
 interface AdminDashboardProps {
   onClose: () => void;
@@ -43,6 +60,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     resetAllToDefault,
     exportGuestListCSV,
   } = useGuests();
+
+  const {
+    giftItems,
+    giftReservations,
+    saveGift,
+    updateGift,
+    deleteGift: deleteGiftItem,
+  } = useGiftContext();
+
+  // ── Active tab ──────────────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState<'guests' | 'gifts'>('guests');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<
@@ -84,6 +112,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   const [newPhone, setNewPhone] = useState('');
   const [newTable, setNewTable] = useState('Por asignar');
   const [formError, setFormError] = useState<string | null>(null);
+
+  // ── Gift management state ────────────────────────────────────────────────────
+  const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+  const [editingGift, setEditingGift] = useState<GiftItem | null>(null);
+  const [giftSaving, setGiftSaving] = useState(false);
+  const [giftError, setGiftError] = useState<string | null>(null);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
+  const emptyGiftForm = {
+    name: '',
+    description: '',
+    imageUrl: '',
+    goalAmount: 50000,
+    totalCupos: 4,
+    pricePerCup: 25000,
+    sortOrder: giftItems.length + 1,
+    active: true,
+  };
+
+  const [giftForm, setGiftForm] = useState(emptyGiftForm);
 
   // Filtered guest list
   const filteredGuests = guests.filter((g) => {
@@ -156,60 +204,175 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     setEditingGuest(null);
   };
 
+  const handleGiftFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!giftForm.name.trim()) {
+      setGiftError('El nombre del regalo es obligatorio.');
+      return;
+    }
+    setGiftSaving(true);
+    setGiftError(null);
+    try {
+      if (editingGift) {
+        await updateGift(editingGift.id, {
+          name: giftForm.name.trim(),
+          description: giftForm.description.trim(),
+          imageUrl:
+            giftForm.imageUrl.trim() ||
+            'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80',
+          pricePerCup: Number(giftForm.pricePerCup),
+          totalCupos: Number(giftForm.totalCupos),
+          goalAmount: Number(giftForm.pricePerCup) * Number(giftForm.totalCupos),
+          sortOrder: Number(giftForm.sortOrder),
+          active: giftForm.active,
+        });
+      } else {
+        await saveGift({
+          name: giftForm.name.trim(),
+          description: giftForm.description.trim(),
+          imageUrl:
+            giftForm.imageUrl.trim() ||
+            'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80',
+          pricePerCup: Number(giftForm.pricePerCup),
+          totalCupos: Number(giftForm.totalCupos),
+          availableCupos: Number(giftForm.totalCupos),
+          goalAmount: Number(giftForm.pricePerCup) * Number(giftForm.totalCupos),
+          currentAmount: 0,
+          sortOrder: Number(giftForm.sortOrder),
+          active: giftForm.active,
+          createdAt: new Date().toISOString(),
+        });
+      }
+      setIsGiftModalOpen(false);
+      setEditingGift(null);
+      setGiftForm(emptyGiftForm);
+    } catch (err) {
+      setGiftError(err instanceof Error ? err.message : 'Error al guardar el regalo');
+    } finally {
+      setGiftSaving(false);
+    }
+  };
+
+  const handleOpenEditGift = (gift: GiftItem) => {
+    setEditingGift(gift);
+    setGiftForm({
+      name: gift.name,
+      description: gift.description,
+      imageUrl: gift.imageUrl,
+      goalAmount: gift.goalAmount || gift.pricePerCup * gift.totalCupos,
+      totalCupos: gift.totalCupos,
+      pricePerCup: gift.pricePerCup,
+      sortOrder: gift.sortOrder ?? 1,
+      active: gift.active !== false,
+    });
+    setGiftError(null);
+    setIsGiftModalOpen(true);
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-[#FDFCF0] overflow-y-auto pb-20">
       {/* Top sticky bar */}
-      <div className="sticky top-0 z-40 bg-[#FDFCF0]/95 backdrop-blur-md border-b border-[#E0D8C3] px-4 sm:px-8 py-4 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#5A5A40] text-white flex items-center justify-center font-serif-display font-bold">
-            B&D
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="font-serif-display text-lg sm:text-xl font-bold text-[#333333]">
-                Panel de Gestión de Invitados
-              </h1>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Firebase Conectado
-              </span>
+      <div className="sticky top-0 z-40 bg-[#FDFCF0]/95 backdrop-blur-md border-b border-[#E0D8C3] px-4 sm:px-8 py-4 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-[#5A5A40] text-white flex items-center justify-center font-serif-display font-bold shrink-0">
+              B&D
             </div>
-            <p className="text-xs text-[#6B6B56]">
-              Control de Asistencia en Tiempo Real &bull; Bárbara & Daniel 2026
-            </p>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="font-serif-display text-base sm:text-xl font-bold text-[#333333]">
+                  Panel de Administración
+                </h1>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Firebase
+                </span>
+              </div>
+              <p className="text-xs text-[#6B6B56] truncate">Bárbara &amp; Daniel 2026</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Context-sensitive action buttons */}
+            {activeTab === 'guests' && (
+              <>
+                <button
+                  onClick={exportGuestListCSV}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#5A5A40] text-[#5A5A40] hover:bg-[#EAE7DC] text-xs font-semibold uppercase tracking-wider transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">CSV</span>
+                </button>
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#5A5A40] text-white hover:bg-[#474732] text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Invitado</span>
+                </button>
+              </>
+            )}
+            {activeTab === 'gifts' && (
+              <button
+                onClick={() => {
+                  setEditingGift(null);
+                  setGiftForm({ ...emptyGiftForm, sortOrder: giftItems.length + 1 });
+                  setGiftError(null);
+                  setIsGiftModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#5A5A40] text-white hover:bg-[#474732] text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Nuevo Regalo</span>
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="w-9 h-9 rounded-full bg-[#EAE7DC] hover:bg-[#E0D8C3] flex items-center justify-center text-[#5A5A40] transition-colors"
+              title="Volver a la invitación"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* Tab switcher */}
+        <div className="flex gap-1 mt-3">
           <button
-            onClick={exportGuestListCSV}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[#5A5A40] text-[#5A5A40] hover:bg-[#EAE7DC] text-xs font-semibold uppercase tracking-wider transition-colors"
+            onClick={() => setActiveTab('guests')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${
+              activeTab === 'guests'
+                ? 'bg-[#5A5A40] text-white shadow-sm'
+                : 'text-[#6B6B56] hover:bg-[#EAE7DC]'
+            }`}
           >
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Exportar CSV</span>
+            <Users className="w-3.5 h-3.5" />
+            Invitados ({guests.length})
           </button>
-
           <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#5A5A40] text-white hover:bg-[#474732] text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+            onClick={() => setActiveTab('gifts')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${
+              activeTab === 'gifts'
+                ? 'bg-[#5A5A40] text-white shadow-sm'
+                : 'text-[#6B6B56] hover:bg-[#EAE7DC]'
+            }`}
           >
-            <UserPlus className="w-4 h-4" />
-            <span className="hidden sm:inline">Agregar Invitado</span>
-          </button>
-
-          <button
-            onClick={onClose}
-            className="w-9 h-9 rounded-full bg-[#EAE7DC] hover:bg-[#E0D8C3] flex items-center justify-center text-[#5A5A40] transition-colors"
-            title="Volver a la invitación"
-          >
-            <X className="w-5 h-5" />
+            <Gift className="w-3.5 h-3.5" />
+            Regalos ({giftItems.length})
+            {giftReservations.filter(r => r.status === 'paid').length > 0 && (
+              <span className="bg-emerald-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {giftReservations.filter(r => r.status === 'paid').length}
+              </span>
+            )}
           </button>
         </div>
       </div>
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
-        {/* Anti-+1 Security Banner / Instruction Guide */}
+        {activeTab === 'guests' && (
+          <div className="space-y-8">
+            {/* Anti-+1 Security Banner / Instruction Guide */}
         <div className="p-5 sm:p-6 rounded-3xl bg-[#EAE7DC] border-2 border-[#BC986A]/40 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
             <div className="w-10 h-10 rounded-2xl bg-[#5A5A40] text-white flex items-center justify-center shrink-0 mt-0.5">
@@ -586,6 +749,360 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             Restaurar Base de Datos Inicial de Prueba
           </button>
         </div>
+          </div>
+        )}
+
+        {/* ── GIFTS MANAGEMENT TAB ──────────────────────────── */}
+        {activeTab === 'gifts' && (
+          <div className="space-y-8">
+            {/* Security and overview banner */}
+            <div className="p-5 sm:p-6 rounded-3xl bg-[#EAE7DC] border-2 border-[#BC986A]/40 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-2xl bg-[#5A5A40] text-white flex items-center justify-center shrink-0 mt-0.5">
+                  <Gift className="w-5 h-5 text-[#EAE7DC]" />
+                </div>
+                <div>
+                  <h3 className="font-serif-display font-bold text-base sm:text-lg text-[#333333]">
+                    Lista de Novios Simbólica — Mercado Pago &amp; Firebase Realtime
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#6B6B56] leading-relaxed mt-0.5 max-w-3xl">
+                    Administra los regalos simbólicos, precios por cupo y cupos disponibles. Al recibir pagos digitales en Mercado Pago, el backend descuenta los cupos automáticamente y te envía una alerta a <strong>danielaguilaralderete4@gmail.com</strong>.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setEditingGift(null);
+                  setGiftForm({ ...emptyGiftForm, sortOrder: giftItems.length + 1 });
+                  setGiftError(null);
+                  setIsGiftModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#5A5A40] text-white hover:bg-[#474732] text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Agregar Regalo</span>
+              </button>
+            </div>
+
+            {/* Gift KPIs */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-[#F7F3E9] p-5 rounded-2xl border border-[#E0D8C3] shadow-sm">
+                <p className="text-xs uppercase tracking-wider font-semibold text-[#6B6B56] mb-1">
+                  Regalos Activos
+                </p>
+                <p className="font-serif-display text-3xl sm:text-4xl font-bold text-[#5A5A40]">
+                  {giftItems.filter((g) => g.active !== false).length}
+                </p>
+                <p className="text-[11px] text-[#6B6B56] mt-1 font-medium">
+                  De {giftItems.length} regalos registrados
+                </p>
+              </div>
+
+              <div className="bg-[#F7F3E9] p-5 rounded-2xl border border-[#8D8741]/40 shadow-sm">
+                <p className="text-xs uppercase tracking-wider font-semibold text-[#8D8741] mb-1">
+                  Cupos Disponibles
+                </p>
+                <p className="font-serif-display text-3xl sm:text-4xl font-bold text-[#5A5A40]">
+                  {giftItems.reduce((s, g) => s + (g.availableCupos ?? 0), 0)}
+                </p>
+                <p className="text-[11px] text-[#6B6B56] mt-1 font-medium">
+                  De {giftItems.reduce((s, g) => s + (g.totalCupos ?? 0), 0)} cupos totales
+                </p>
+              </div>
+
+              <div className="bg-[#F7F3E9] p-5 rounded-2xl border border-[#BC986A]/40 shadow-sm">
+                <p className="text-xs uppercase tracking-wider font-semibold text-[#BC986A] mb-1">
+                  Aportes Pagados
+                </p>
+                <p className="font-serif-display text-3xl sm:text-4xl font-bold text-[#333333]">
+                  {giftReservations.filter((r) => r.status === 'paid').length}
+                </p>
+                <p className="text-[11px] text-[#6B6B56] mt-1 font-medium">
+                  {giftReservations.filter((r) => r.status === 'pending').length} pendientes
+                </p>
+              </div>
+
+              <div className="bg-[#F7F3E9] p-5 rounded-2xl border border-[#5A5A40]/40 shadow-sm">
+                <p className="text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-1">
+                  Total Recaudado
+                </p>
+                <p className="font-serif-display text-2xl sm:text-3xl font-bold text-[#5A5A40] truncate">
+                  {formatCLP(
+                    giftReservations
+                      .filter((r) => r.status === 'paid')
+                      .reduce((s, r) => s + (r.totalAmount ?? 0), 0)
+                  )}
+                </p>
+                <p className="text-[11px] text-[#6B6B56] mt-1 font-medium">
+                  Vía Mercado Pago
+                </p>
+              </div>
+            </div>
+
+            {/* Gift Catalog Section */}
+            <div className="bg-white rounded-3xl border border-[#E0D8C3] shadow-sm p-6 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#E0D8C3]">
+                <div>
+                  <h2 className="font-serif-display text-xl font-bold text-[#333333]">
+                    Catálogo de Regalos Simbólicos
+                  </h2>
+                  <p className="text-xs text-[#6B6B56]">
+                    Edita precios por cupo, cantidades disponibles o añade nuevos regalos a la lista pública.
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingGift(null);
+                    setGiftForm({ ...emptyGiftForm, sortOrder: giftItems.length + 1 });
+                    setGiftError(null);
+                    setIsGiftModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5A5A40] text-white hover:bg-[#474732] text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm self-start"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Nuevo Regalo</span>
+                </button>
+              </div>
+
+              {giftItems.length === 0 ? (
+                <div className="py-12 text-center text-[#6B6B56]">
+                  <Gift className="w-10 h-10 mx-auto mb-2 text-[#D8C29A]" />
+                  <p className="font-serif-display text-base">No hay regalos registrados.</p>
+                  <p className="text-xs mt-1">Haz clic en "Nuevo Regalo" para agregar el primero.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {giftItems.map((gift) => {
+                    const isInactive = gift.active === false;
+                    return (
+                      <div
+                        key={gift.id}
+                        className={`rounded-2xl border transition-all overflow-hidden flex flex-col ${
+                          isInactive
+                            ? 'border-gray-200 bg-gray-50/70 opacity-70'
+                            : 'border-[#E0D8C3] bg-[#FDFCF0] shadow-sm hover:shadow-md'
+                        }`}
+                      >
+                        <div className="relative h-44 overflow-hidden bg-[#EAE7DC]">
+                          <img
+                            src={gift.imageUrl}
+                            alt={gift.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src =
+                                'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80';
+                            }}
+                          />
+                          <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                isInactive
+                                  ? 'bg-gray-700 text-white'
+                                  : 'bg-emerald-700 text-white'
+                              }`}
+                            >
+                              {isInactive ? 'Inactivo' : 'Visible'}
+                            </span>
+                          </div>
+                          <div className="absolute bottom-2.5 left-2.5">
+                            <span className="px-2.5 py-1 rounded-xl bg-black/60 backdrop-blur-sm text-white text-xs font-bold font-mono">
+                              {formatCLP(gift.pricePerCup)} / cupo
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                          <div>
+                            <div className="flex items-start justify-between gap-2">
+                              <h3 className="font-serif-display font-bold text-base text-[#333333]">
+                                {gift.name}
+                              </h3>
+                              <span className="text-[11px] font-semibold text-[#6B6B56] shrink-0">
+                                Orden #{gift.sortOrder ?? 0}
+                              </span>
+                            </div>
+                            <p className="text-xs text-[#6B6B56] mt-1 line-clamp-2">
+                              {gift.description}
+                            </p>
+                          </div>
+
+                          <div className="space-y-1.5 bg-[#F7F3E9] p-3 rounded-xl border border-[#E0D8C3]">
+                            <div className="flex justify-between text-xs">
+                              <span className="text-[#6B6B56]">Cupos disponibles:</span>
+                              <span className="font-bold text-[#333333]">
+                                {gift.availableCupos} de {gift.totalCupos}
+                              </span>
+                            </div>
+                            <div className="h-2 rounded-full bg-[#E0D8C3] overflow-hidden">
+                              <div
+                                className="h-full bg-[#5A5A40] rounded-full transition-all"
+                                style={{
+                                  width: `${Math.max(
+                                    5,
+                                    gift.totalCupos > 0
+                                      ? (gift.availableCupos / gift.totalCupos) * 100
+                                      : 0
+                                  )}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-2 border-t border-[#E0D8C3] text-xs">
+                            <button
+                              onClick={() =>
+                                updateGift(gift.id, { active: isInactive })
+                              }
+                              className="text-[#6B6B56] hover:text-[#333333] font-medium flex items-center gap-1"
+                              title={isInactive ? 'Activar regalo' : 'Desactivar regalo'}
+                            >
+                              {isInactive ? (
+                                <>
+                                  <ToggleLeft className="w-4 h-4 text-gray-400" />
+                                  <span>Activar</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ToggleRight className="w-4 h-4 text-emerald-600" />
+                                  <span>Ocultar</span>
+                                </>
+                              )}
+                            </button>
+
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => handleOpenEditGift(gift)}
+                                className="p-1.5 rounded-lg text-[#5A5A40] hover:bg-[#EAE7DC] transition-colors"
+                                title="Editar regalo"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  if (
+                                    confirm(
+                                      `¿Estás seguro de eliminar el regalo "${gift.name}"?`
+                                    )
+                                  ) {
+                                    deleteGiftItem(gift.id);
+                                  }
+                                }}
+                                className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                                title="Eliminar regalo"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Orders / Reservations List */}
+            <div className="bg-white rounded-3xl border border-[#E0D8C3] shadow-sm overflow-hidden">
+              <div className="p-6 bg-[#F7F3E9] border-b border-[#E0D8C3] flex items-center justify-between">
+                <div>
+                  <h2 className="font-serif-display text-xl font-bold text-[#333333]">
+                    Aportes y Pagos Recibidos ({giftReservations.length})
+                  </h2>
+                  <p className="text-xs text-[#6B6B56]">
+                    Historial de contribuciones registradas y procesadas por Mercado Pago.
+                  </p>
+                </div>
+              </div>
+
+              {giftReservations.length === 0 ? (
+                <div className="py-12 text-center text-[#6B6B56]">
+                  <CreditCard className="w-10 h-10 mx-auto mb-2 text-[#D8C29A]" />
+                  <p className="font-serif-display text-base">Aún no se han recibido aportes.</p>
+                  <p className="text-xs mt-1">
+                    Cuando un invitado reserve y pague un regalo en Mercado Pago, aparecerá aquí.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs sm:text-sm border-collapse">
+                    <thead>
+                      <tr className="bg-[#EAE7DC] text-[#5A5A40] uppercase text-[11px] tracking-wider border-b border-[#E0D8C3]">
+                        <th className="py-3 px-4 font-bold">Invitado</th>
+                        <th className="py-3 px-4 font-bold">Regalos y Cupos</th>
+                        <th className="py-3 px-4 font-bold text-right">Monto Total</th>
+                        <th className="py-3 px-4 font-bold text-center">Estado</th>
+                        <th className="py-3 px-4 font-bold">Fecha</th>
+                        <th className="py-3 px-4 font-bold">Mensaje</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E0D8C3]/50">
+                      {giftReservations.map((order) => {
+                        const isPaid = order.status === 'paid';
+                        const isPending = order.status === 'pending';
+                        return (
+                          <tr key={order.id} className="hover:bg-[#F7F3E9] transition-colors">
+                            <td className="py-3.5 px-4">
+                              <div className="font-bold text-[#333333]">{order.guestName}</div>
+                              <div className="text-[11px] text-[#6B6B56]">{order.email}</div>
+                              {order.phone && (
+                                <div className="text-[10px] text-[#8D8741]">{order.phone}</div>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="space-y-1">
+                                {order.items?.map((it, idx) => (
+                                  <div key={idx} className="text-xs text-[#333333]">
+                                    <span className="font-medium">{it.giftName}</span>
+                                    <span className="ml-1 text-[#6B6B56]">×{it.quantity}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4 text-right font-bold font-mono text-[#5A5A40] text-sm">
+                              {formatCLP(order.totalAmount)}
+                            </td>
+                            <td className="py-3.5 px-4 text-center">
+                              {isPaid ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                  <CheckCircle className="w-3 h-3 text-emerald-600" />
+                                  Pagado MP
+                                </span>
+                              ) : isPending ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                  <Clock className="w-3 h-3 text-amber-600" />
+                                  Pendiente
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">
+                                  <X className="w-3 h-3" />
+                                  Cancelado
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-4 text-xs text-[#6B6B56] whitespace-nowrap">
+                              {order.createdAt
+                                ? new Date(order.createdAt).toLocaleDateString('es-CL', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })
+                                : '-'}
+                            </td>
+                            <td className="py-3.5 px-4 max-w-xs text-xs text-[#6B6B56] italic">
+                              {order.message ? `"${order.message}"` : '-'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* MODAL: ADD GUEST */}
@@ -928,6 +1445,189 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 Cerrar Notificación
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ADD / EDIT GIFT */}
+      {isGiftModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#FDFCF0] rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-[#E0D8C3] shadow-2xl animate-fade-in relative max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center pb-4 border-b border-[#E0D8C3] mb-6">
+              <div>
+                <h3 className="font-serif-display text-xl font-bold text-[#333333]">
+                  {editingGift ? 'Editar Regalo Simbólico' : 'Nuevo Regalo Simbólico'}
+                </h3>
+                <span className="text-xs text-[#6B6B56]">
+                  {editingGift ? `Modificando: ${editingGift.name}` : 'Añadir un regalo a la lista de novios'}
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  setIsGiftModalOpen(false);
+                  setEditingGift(null);
+                }}
+                className="text-[#6B6B56] hover:text-[#333333]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleGiftFormSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-1">
+                  Nombre del Regalo <span className="text-[#8D8741]">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={giftForm.name}
+                  onChange={(e) => setGiftForm({ ...giftForm, name: e.target.value })}
+                  placeholder="Ej: Noche de Hotel, Vajilla, Luna de Miel..."
+                  className="w-full bg-white border border-[#E0D8C3] rounded-xl px-3.5 py-2.5 text-sm focus:border-[#5A5A40] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-1">
+                  Descripción
+                </label>
+                <textarea
+                  rows={2}
+                  value={giftForm.description}
+                  onChange={(e) => setGiftForm({ ...giftForm, description: e.target.value })}
+                  placeholder="Un detalle especial para recordar este día..."
+                  className="w-full bg-white border border-[#E0D8C3] rounded-xl px-3.5 py-2.5 text-sm focus:border-[#5A5A40] outline-none resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-1">
+                  URL de la Foto / Imagen
+                </label>
+                <input
+                  type="url"
+                  value={giftForm.imageUrl}
+                  onChange={(e) => setGiftForm({ ...giftForm, imageUrl: e.target.value })}
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full bg-white border border-[#E0D8C3] rounded-xl px-3.5 py-2.5 text-sm focus:border-[#5A5A40] outline-none"
+                />
+                {giftForm.imageUrl && (
+                  <div className="mt-2 h-28 rounded-xl overflow-hidden bg-[#EAE7DC] border border-[#E0D8C3]">
+                    <img
+                      src={giftForm.imageUrl}
+                      alt="Vista previa"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src =
+                          'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80';
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-1">
+                    Precio por Cupo (CLP) <span className="text-[#8D8741]">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min={1000}
+                    step={1000}
+                    required
+                    value={giftForm.pricePerCup}
+                    onChange={(e) => setGiftForm({ ...giftForm, pricePerCup: Number(e.target.value) })}
+                    className="w-full bg-white border border-[#E0D8C3] rounded-xl px-3.5 py-2.5 text-sm focus:border-[#5A5A40] outline-none font-mono"
+                  />
+                  <span className="text-[10px] text-[#6B6B56] mt-0.5 block">
+                    {formatCLP(giftForm.pricePerCup || 0)}
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-1">
+                    Total Cupos <span className="text-[#8D8741]">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={100}
+                    required
+                    value={giftForm.totalCupos}
+                    onChange={(e) => setGiftForm({ ...giftForm, totalCupos: Number(e.target.value) })}
+                    className="w-full bg-white border border-[#E0D8C3] rounded-xl px-3.5 py-2.5 text-sm focus:border-[#5A5A40] outline-none"
+                  />
+                  <span className="text-[10px] text-[#6B6B56] mt-0.5 block">
+                    Meta: {formatCLP((giftForm.pricePerCup || 0) * (giftForm.totalCupos || 0))}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 items-center">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-1">
+                    Orden de Lista
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={giftForm.sortOrder}
+                    onChange={(e) => setGiftForm({ ...giftForm, sortOrder: Number(e.target.value) })}
+                    className="w-full bg-white border border-[#E0D8C3] rounded-xl px-3.5 py-2.5 text-sm focus:border-[#5A5A40] outline-none"
+                  />
+                </div>
+
+                <div className="pt-4">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={giftForm.active}
+                      onChange={(e) => setGiftForm({ ...giftForm, active: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#5A5A40] focus:ring-[#5A5A40]"
+                    />
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#333333]">
+                      Regalo Activo / Visible
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {giftError && (
+                <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{giftError}</span>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-[#E0D8C3]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsGiftModalOpen(false);
+                    setEditingGift(null);
+                  }}
+                  className="px-4 py-2 text-xs font-semibold uppercase text-[#6B6B56] hover:bg-[#EAE7DC] rounded-xl"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={giftSaving}
+                  className="px-5 py-2 text-xs font-semibold uppercase tracking-wider bg-[#5A5A40] text-white rounded-xl hover:bg-[#474732] shadow-sm flex items-center gap-2 disabled:opacity-50"
+                >
+                  {giftSaving ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Guardando…</span>
+                    </>
+                  ) : (
+                    <span>{editingGift ? 'Actualizar Regalo' : 'Crear Regalo'}</span>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

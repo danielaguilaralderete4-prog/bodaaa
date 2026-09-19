@@ -6,21 +6,24 @@ import { StorySection } from './components/StorySection';
 import { EventDetailsSection } from './components/EventDetailsSection';
 import { ProtocolSection } from './components/ProtocolSection';
 import { GiftRegistrySection } from './components/GiftRegistrySection';
-import { RSVPSection } from './components/RSVPSection';
-import { MusicRequestsSection } from './components/MusicRequestsSection';
-import { AdminDashboard } from './components/AdminDashboard';
-import { PasswordModal } from './components/PasswordModal';
-import { MobileBottomNav } from './components/MobileBottomNav';
-import { Footer } from './components/Footer';
-import { FloatingMusicButton } from './components/FloatingMusicButton';
-import { getSavedAudioUrl } from './utils/audioStorage';
-import { weddingAudio } from './utils/audioEngine';
+import {GiftRegistryPage} from './components/GiftRegistryPage';
+import {RSVPSection} from './components/RSVPSection';
+import {MusicRequestsSection} from './components/MusicRequestsSection';
+import {AdminDashboard} from './components/AdminDashboard';
+import {PasswordModal} from './components/PasswordModal';
+import {MobileBottomNav} from './components/MobileBottomNav';
+import {Footer} from './components/Footer';
+import {FloatingMusicButton} from './components/FloatingMusicButton';
+import {getSavedAudioUrl} from './utils/audioStorage';
+import {weddingAudio} from './utils/audioEngine';
 import defaultWeddingSong from './assets/audio/caminar-de-tu-mano.mp3';
-import { auth } from './lib/firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import {auth} from './lib/firebase';
+import {onAuthStateChanged, signOut} from 'firebase/auth';
+import { GiftProvider } from './context/GiftContext';
 
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [showGiftPage, setShowGiftPage] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
@@ -74,64 +77,92 @@ export default function App() {
     setIsPasswordModalOpen(true);
   };
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setShowGiftPage(params.get('page') === 'regalos');
+  }, []);
+
+  const openGiftPage = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', 'regalos');
+    window.history.pushState({}, '', url);
+    setShowGiftPage(true);
+  };
+
+  const openInvitationPage = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('page');
+    window.history.pushState({}, '', url);
+    setShowGiftPage(false);
+  };
+
   return (
-    <GuestProvider>
-      <div className="min-h-screen bg-[#F8F4EC] text-[#3B3B3B] font-sans antialiased selection:bg-[#E8DFCF] selection:text-[#18243D] relative">
-        {/* Floating Music Button visible at bottom right */}
-        <FloatingMusicButton
-          isPlaying={isPlayingMusic}
-          onToggle={toggleMusic}
-          audioBlobUrl={audioBlobUrl}
-        />
+    <GiftProvider>
+      <GuestProvider>
+        <div className="min-h-screen bg-[#F8F4EC] text-[#3B3B3B] font-sans antialiased selection:bg-[#E8DFCF] selection:text-[#18243D] relative">
+          {showGiftPage ? (
+            <GiftRegistryPage />
+          ) : (
+            <>
+              {/* Floating Music Button visible at bottom right */}
+              <FloatingMusicButton
+                isPlaying={isPlayingMusic}
+                onToggle={toggleMusic}
+                audioBlobUrl={audioBlobUrl}
+              />
 
-        {/* Desktop & Mobile Header */}
-        <Header
-          isAdminOpen={isAdminOpen}
-          onToggleAdmin={handleAdminToggle}
-        />
+              <Header isAdminOpen={isAdminOpen} onToggleAdmin={handleAdminToggle} />
 
-        {/* Main Wedding Invitation View */}
-        <main className="w-full pb-24 md:pb-0">
-          <HeroSection />
-          <StorySection />
-          <EventDetailsSection />
-          <ProtocolSection />
-          <GiftRegistrySection />
-          <RSVPSection />
-          <MusicRequestsSection />
-        </main>
+              <main className="w-full pb-24 md:pb-0">
+                <HeroSection />
+                <StorySection />
+                <EventDetailsSection />
+                <ProtocolSection />
+                <GiftRegistrySection onOpenGiftPage={openGiftPage} />
+                <RSVPSection />
+                <MusicRequestsSection />
+              </main>
 
-        {/* Footer */}
-        <Footer />
+              <Footer onOpenGiftPage={openGiftPage} />
 
-        {/* Mobile Fixed Bottom Navigation */}
-        <MobileBottomNav
-          isAdminOpen={isAdminOpen}
-          onToggleAdmin={handleAdminToggle}
-        />
+              <MobileBottomNav isAdminOpen={isAdminOpen} onToggleAdmin={handleAdminToggle} />
+            </>
+          )}
 
-        {/* Fullscreen Admin Management Dashboard Modal */}
-        {isAdminOpen && (
-          <AdminDashboard
-            onClose={() => {
-              setIsAdminOpen(false);
-              setIsAdminAuthenticated(false);
-              void signOut(auth);
-            }}
-          />
-        )}
+          {showGiftPage && (
+            <div className="fixed bottom-4 left-4 z-40">
+              <button
+                type="button"
+                onClick={openInvitationPage}
+                className="rounded-full bg-[#18243D] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white shadow-lg"
+              >
+                Volver a la invitación
+              </button>
+            </div>
+          )}
 
-        {isPasswordModalOpen && (
-          <PasswordModal
-            onClose={() => setIsPasswordModalOpen(false)}
-            onSuccess={() => {
-              setIsPasswordModalOpen(false);
-              setIsAdminAuthenticated(true);
-              setIsAdminOpen(true);
-            }}
-          />
-        )}
-      </div>
-    </GuestProvider>
+          {isAdminOpen && (
+            <AdminDashboard
+              onClose={() => {
+                setIsAdminOpen(false);
+                setIsAdminAuthenticated(false);
+                void signOut(auth);
+              }}
+            />
+          )}
+
+          {isPasswordModalOpen && (
+            <PasswordModal
+              onClose={() => setIsPasswordModalOpen(false)}
+              onSuccess={() => {
+                setIsPasswordModalOpen(false);
+                setIsAdminAuthenticated(true);
+                setIsAdminOpen(true);
+              }}
+            />
+          )}
+        </div>
+      </GuestProvider>
+    </GiftProvider>
   );
 }
