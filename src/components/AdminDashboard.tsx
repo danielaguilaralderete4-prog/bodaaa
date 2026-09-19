@@ -269,6 +269,47 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     setIsGiftModalOpen(true);
   };
 
+  const exportGiftsCSV = () => {
+    const headers = [
+      'ID Orden',
+      'Fecha',
+      'Donante / Invitado',
+      'Correo',
+      'Telefono',
+      'Estado',
+      'Monto Total CLP',
+      'Regalos y Cupos',
+      'Mensaje',
+    ];
+
+    const rows = giftReservations.map((r) => [
+      `"${r.id}"`,
+      `"${r.createdAt ? new Date(r.createdAt).toLocaleString('es-CL') : ''}"`,
+      `"${r.guestName.replace(/"/g, '""')}"`,
+      `"${r.email.replace(/"/g, '""')}"`,
+      `"${(r.phone || '').replace(/"/g, '""')}"`,
+      `"${r.status === 'paid' ? 'Pagado MP' : r.status === 'pending' ? 'Pendiente' : 'Cancelado'}"`,
+      r.totalAmount,
+      `"${(r.items || []).map((it) => `${it.giftName} (x${it.quantity})`).join('; ').replace(/"/g, '""')}"`,
+      `"${(r.message || '').replace(/"/g, '""')}"`,
+    ]);
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,\uFEFF' +
+      [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute(
+      'download',
+      `Lista_Aportes_Regalos_Barbara_Daniel_${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-[#FDFCF0] overflow-y-auto pb-20">
       {/* Top sticky bar */}
@@ -313,18 +354,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
               </>
             )}
             {activeTab === 'gifts' && (
-              <button
-                onClick={() => {
-                  setEditingGift(null);
-                  setGiftForm({ ...emptyGiftForm, sortOrder: giftItems.length + 1 });
-                  setGiftError(null);
-                  setIsGiftModalOpen(true);
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#5A5A40] text-white hover:bg-[#474732] text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">Nuevo Regalo</span>
-              </button>
+              <>
+                <button
+                  onClick={exportGiftsCSV}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#5A5A40] text-[#5A5A40] hover:bg-[#EAE7DC] text-xs font-semibold uppercase tracking-wider transition-colors"
+                  title="Descargar planilla de regalos y aportes en Excel / CSV"
+                >
+                  <Download className="w-4 h-4" />
+                  <span className="hidden sm:inline">CSV</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingGift(null);
+                    setGiftForm({ ...emptyGiftForm, sortOrder: giftItems.length + 1 });
+                    setGiftError(null);
+                    setIsGiftModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#5A5A40] text-white hover:bg-[#474732] text-xs font-semibold uppercase tracking-wider transition-colors shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline">Nuevo Regalo</span>
+                </button>
+              </>
             )}
             <button
               onClick={onClose}
@@ -726,28 +777,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Reset Database and Footer helper */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[#EAE7DC] border border-[#E0D8C3] text-xs text-[#6B6B56]">
-          <div>
-            <span>
-              Mostrando <strong>{filteredGuests.length}</strong> de{' '}
-              <strong>{guests.length}</strong> invitaciones registradas.
-            </span>
-          </div>
-          <button
-            onClick={() => {
-              if (
-                confirm(
-                  '¿Deseas restaurar la base de datos de invitados a los valores iniciales de prueba?'
-                )
-              ) {
-                resetAllToDefault();
-              }
-            }}
-            className="text-xs text-[#5A5A40] hover:underline font-semibold"
-          >
-            Restaurar Base de Datos Inicial de Prueba
-          </button>
+        {/* Footer helper */}
+        <div className="p-4 rounded-2xl bg-[#EAE7DC] border border-[#E0D8C3] text-xs text-[#6B6B56] text-center sm:text-left">
+          <span>
+            Mostrando <strong>{filteredGuests.length}</strong> de{' '}
+            <strong>{guests.length}</strong> invitaciones registradas.
+          </span>
         </div>
           </div>
         )}

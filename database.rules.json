@@ -1,5 +1,19 @@
 {
   "rules": {
+    "guestDirectory": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "guests": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "guestResponses": {
+      ".read": "auth != null",
+      "$responseId": {
+        ".write": "!data.exists() && newData.exists()"
+      }
+    },
     "giftCatalog": {
       ".read": true,
       ".write": "auth != null"
@@ -10,13 +24,11 @@
         ".write": "auth != null"
       }
     },
-    "guests": {
-      ".read": true,
-      ".write": "auth != null"
-    },
     "musicRequests": {
       ".read": true,
-      ".write": true
+      "$requestId": {
+        ".write": "!data.exists() || auth != null"
+      }
     }
   }
 }

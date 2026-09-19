@@ -7,7 +7,7 @@ import { GiftItem, GiftReservation } from '../types';
 // ─── Backend API base URL ──────────────────────────────────────────────────────
 // In development the Vite dev server proxies /api → localhost:3001
 // In production both frontend and backend are served from the same origin.
-const API_BASE = '/api/gifts';
+const API_BASE = (import.meta.env.VITE_BACKEND_URL ? import.meta.env.VITE_BACKEND_URL.replace(/\/$/, '') : '') + '/api/gifts';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

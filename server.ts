@@ -336,6 +336,29 @@ app.get('/api/gifts/catalog', async (_req: Request, res: Response) => {
   }
 });
 
+// Rate limiter en memoria para prevenir spam o abusos en la creación de pagos
+const ipRateMap = new Map<string, { count: number; resetTime: number }>();
+const preferenceRateLimiter = (req: Request, res: Response, next: NextFunction) => {
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const windowMs = 5 * 60 * 1000; // 5 minutos
+  const maxRequests = 20;
+
+  const record = ipRateMap.get(ip);
+  if (!record || now > record.resetTime) {
+    ipRateMap.set(ip, { count: 1, resetTime: now + windowMs });
+    return next();
+  }
+
+  if (record.count >= maxRequests) {
+    res.status(429).json({ error: 'Has realizado demasiados intentos. Por favor espera unos minutos.' });
+    return;
+  }
+
+  record.count++;
+  next();
+};
+
 /**
  * POST /api/gifts/create-preference
  * Body: { orderId, guestName, email, phone, message, items, totalAmount }
@@ -344,7 +367,7 @@ app.get('/api/gifts/catalog', async (_req: Request, res: Response) => {
  * 3. Crea una Preference en Mercado Pago
  * 4. Retorna { preferenceId, initPoint, sandboxInitPoint }
  */
-app.post('/api/gifts/create-preference', async (req: Request, res: Response) => {
+app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Request, res: Response) => {
   try {
     const {
       orderId,
@@ -365,15 +388,14 @@ app.post('/api/gifts/create-preference', async (req: Request, res: Response) => 
     } = req.body;
 
     // ── Validar campos requeridos ──────────────────────────────────────────
-    if (!orderId || !guestName?.trim() || !email?.trim() || !items?.length || !totalAmount) {
+    if (!orderId || !guestName?.trim() || !items?.length || !totalAmount) {
       res.status(400).json({ error: 'Datos de orden incompletos' });
       return;
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      res.status(400).json({ error: 'Correo electrónico inválido' });
-      return;
-    }
+    const guestEmail = (email?.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      ? email.trim().toLowerCase()
+      : 'invitado@boda.cl';
 
     // ── Validar cupos disponibles ──────────────────────────────────────────
     const catalogSnap = await db.ref('giftCatalog').once('value');
@@ -412,7 +434,7 @@ app.post('/api/gifts/create-preference', async (req: Request, res: Response) => 
     const order: GiftOrder = {
       id: orderId,
       guestName: guestName.trim(),
-      email: email.trim().toLowerCase(),
+      email: guestEmail,
       phone: phone?.trim(),
       message: message?.trim(),
       items,
@@ -440,7 +462,7 @@ app.post('/api/gifts/create-preference', async (req: Request, res: Response) => 
         items: mpItems,
         payer: {
           name: guestName.trim(),
-          email: email.trim().toLowerCase(),
+          email: guestEmail,
         },
         back_urls: {
           success: `${appBaseUrl}/?page=regalos&payment_status=approved&order_id=${orderId}`,

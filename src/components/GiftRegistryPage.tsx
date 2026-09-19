@@ -243,9 +243,9 @@ export const GiftRegistryPage: React.FC = () => {
   const [cart, setCart] = useState<Record<string, number>>({});
   const [showCart, setShowCart] = useState(false);
 
-  // Form
-  const [form, setForm] = useState({ guestName: '', email: '', phone: '', message: '' });
-  const [formErrors, setFormErrors] = useState<Partial<typeof form>>({});
+  // Form — solo Nombre y Mensaje a gusto del invitado
+  const [form, setForm] = useState({ guestName: '', message: '' });
+  const [formErrors, setFormErrors] = useState<{ guestName?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -285,13 +285,10 @@ export const GiftRegistryPage: React.FC = () => {
     []
   );
 
-  // Validation
+  // Validation: solo el nombre es necesario
   const validate = () => {
-    const errors: Partial<typeof form> = {};
-    if (!form.guestName.trim()) errors.guestName = 'Ingresa tu nombre';
-    if (!form.email.trim()) errors.email = 'Ingresa tu correo';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-      errors.email = 'Correo no válido';
+    const errors: { guestName?: string } = {};
+    if (!form.guestName.trim()) errors.guestName = 'Por favor ingresa tu nombre';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -307,8 +304,7 @@ export const GiftRegistryPage: React.FC = () => {
     try {
       const { checkoutUrl } = await initiateGiftPayment({
         guestName: form.guestName.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim(),
+        email: 'invitado@boda.cl',
         message: form.message.trim(),
         items: cartEntries,
         totalAmount,
@@ -331,7 +327,7 @@ export const GiftRegistryPage: React.FC = () => {
     setPaymentStatus(null);
     setReturnOrderId(null);
     setCart({});
-    setForm({ guestName: '', email: '', phone: '', message: '' });
+    setForm({ guestName: '', message: '' });
   };
 
   // ── Payment result view ────────────────────────────────────────────────────
@@ -562,22 +558,22 @@ export const GiftRegistryPage: React.FC = () => {
               </span>
             </div>
 
-            {/* Checkout form */}
+            {/* Checkout form — solo Nombre y Mensaje a gusto del invitado */}
             <form onSubmit={handlePayment} className="space-y-4" noValidate>
               <h4 className="font-serif-display text-lg text-[#18243D]">Tus datos</h4>
 
-              <div className="grid gap-4 md:grid-cols-2">
+              <div>
                 {/* Nombre */}
                 <label className="block">
                   <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#18243D]">
-                    Nombre completo *
+                    ¿Quién envía este regalo? (Tu nombre o familia) *
                   </span>
                   <input
                     type="text"
                     autoComplete="name"
                     value={form.guestName}
                     onChange={(e) => setForm({ ...form, guestName: e.target.value })}
-                    placeholder="María Pérez"
+                    placeholder="Ej: María Pérez o Familia Rodríguez Morales"
                     className={`mt-1.5 w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none transition focus:border-[#18243D] ${
                       formErrors.guestName ? 'border-red-400' : 'border-[#D8C29A]'
                     }`}
@@ -589,57 +585,19 @@ export const GiftRegistryPage: React.FC = () => {
                     </p>
                   )}
                 </label>
-
-                {/* Email */}
-                <label className="block">
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#18243D]">
-                    Correo electrónico *
-                  </span>
-                  <input
-                    type="email"
-                    autoComplete="email"
-                    value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    placeholder="tu@correo.com"
-                    className={`mt-1.5 w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none transition focus:border-[#18243D] ${
-                      formErrors.email ? 'border-red-400' : 'border-[#D8C29A]'
-                    }`}
-                  />
-                  {formErrors.email && (
-                    <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-                      <AlertCircle className="h-3 w-3" />
-                      {formErrors.email}
-                    </p>
-                  )}
-                </label>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-2">
-                {/* Teléfono */}
-                <label className="block">
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#18243D]">
-                    Teléfono (opcional)
-                  </span>
-                  <input
-                    type="tel"
-                    autoComplete="tel"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    placeholder="+56 9 1234 5678"
-                    className="mt-1.5 w-full rounded-2xl border border-[#D8C29A] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#18243D]"
-                  />
-                </label>
-
+              <div>
                 {/* Mensaje */}
                 <label className="block">
                   <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#18243D]">
-                    Mensaje para nosotros (opcional)
+                    Mensaje o dedicatoria para los novios (opcional)
                   </span>
                   <textarea
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
-                    placeholder="¡Muchas felicidades!"
-                    rows={1}
+                    placeholder="¡Muchas felicidades en este gran paso! Con todo nuestro cariño…"
+                    rows={3}
                     className="mt-1.5 w-full resize-none rounded-2xl border border-[#D8C29A] bg-white px-4 py-3 text-sm outline-none transition focus:border-[#18243D]"
                   />
                 </label>
