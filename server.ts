@@ -46,10 +46,11 @@ if (missing.length) {
 }
 
 // ─── FIREBASE ADMIN ───────────────────────────────────────────────────────────
-// Initialize once. Uses Application Default Credentials OR service account JSON.
+// Se inicializa una sola vez. Usa el JSON de la cuenta de servicio si está
+// definido (obligatorio en Render/Railway); si no, cae a Application Default
+// Credentials (solo funciona en entornos GCP como Cloud Run).
 if (!getApps().length) {
   try {
-    // If FIREBASE_SERVICE_ACCOUNT_JSON env var is set, use it; otherwise use ADC.
     if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
       const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
       initializeApp({
@@ -57,7 +58,12 @@ if (!getApps().length) {
         databaseURL: FIREBASE_DATABASE_URL,
       });
     } else {
-      // Falls back to Application Default Credentials (for local dev / Cloud Run)
+      console.warn(
+        '⚠️  FIREBASE_SERVICE_ACCOUNT_JSON no está configurado. Se usará Application ' +
+          'Default Credentials, que NO funciona en Render/Railway y hará que las ' +
+          'peticiones a la base de datos se cuelguen. Configura esa variable en el ' +
+          'panel del backend con el JSON de la cuenta de servicio de Firebase.'
+      );
       initializeApp({
         credential: applicationDefault(),
         databaseURL: FIREBASE_DATABASE_URL,
@@ -71,6 +77,26 @@ if (!getApps().length) {
 }
 
 const db = getDatabase();
+
+/** Evita que una llamada a Firebase se cuelgue indefinidamente (p. ej. si las
+ * credenciales no son válidas). Lanza un error claro tras `ms` milisegundos. */
+function withTimeout<T>(promise: Promise<T>, label: string, ms = 8000): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(
+        () =>
+          reject(
+            new Error(
+              `Tiempo de espera agotado (${label}). Verifica FIREBASE_SERVICE_ACCOUNT_JSON en el backend.`
+            )
+          ),
+        ms
+      )
+    ),
+  ]);
+}
+
 
 // ─── MERCADO PAGO ─────────────────────────────────────────────────────────────
 const mpClient = new MercadoPagoConfig({
@@ -316,7 +342,7 @@ app.get('/health', (_req: Request, res: Response) => {
  */
 app.get('/api/gifts/catalog', async (_req: Request, res: Response) => {
   try {
-    const snap = await db.ref('giftCatalog').once('value');
+    const snap = await withTimeout(db.ref('giftCatalog').once('value'), 'lectura de catálogo');
     const val = snap.val() as Record<string, GiftItem> | null;
 
     if (!val) {
@@ -398,7 +424,7 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
       : 'invitado@boda.cl';
 
     // ── Validar cupos disponibles ──────────────────────────────────────────
-    const catalogSnap = await db.ref('giftCatalog').once('value');
+    const catalogSnap = await withTimeout(db.ref('giftCatalog').once('value'), 'validación de cupos');
     const catalog = catalogSnap.val() as Record<string, GiftItem> | null;
 
     if (!catalog) {
@@ -443,7 +469,7 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
       createdAt: new Date().toISOString(),
     };
 
-    await db.ref(`giftOrders/${orderId}`).set(order);
+    await withTimeout(db.ref(`giftOrders/${orderId}`).set(order), 'guardado de orden');
 
     // ── Crear Preference en Mercado Pago ──────────────────────────────────
     const appBaseUrl = req.headers.origin || allowedOrigins[0];
@@ -480,7 +506,10 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
     });
 
     // Guardar preferenceId en la orden
-    await db.ref(`giftOrders/${orderId}/preferenceId`).set(preference.id);
+    await withTimeout(
+      db.ref(`giftOrders/${orderId}/preferenceId`).set(preference.id),
+      'guardado de preferenceId'
+    );
 
     res.json({
       preferenceId: preference.id,
@@ -547,7 +576,7 @@ app.post('/api/gifts/mp-webhook', async (req: Request, res: Response) => {
     }
 
     // Leer la orden actual
-    const orderSnap = await db.ref(`giftOrders/${orderId}`).once('value');
+    const orderSnap = await withTimeout(db.ref(`giftOrders/${orderId}`).once('value'), 'lectura de orden (webhook)');
     const order = orderSnap.val() as GiftOrder | null;
 
     if (!order) {
@@ -563,25 +592,31 @@ app.post('/api/gifts/mp-webhook', async (req: Request, res: Response) => {
     const paidAt = new Date().toISOString();
 
     // Actualizar la orden a 'paid'
-    await db.ref(`giftOrders/${orderId}`).update({
-      status: 'paid',
-      mpPaymentId: String(dataId),
-      mpOrderId: String(paymentData.order?.id ?? ''),
-      paidAt,
-    });
+    await withTimeout(
+      db.ref(`giftOrders/${orderId}`).update({
+        status: 'paid',
+        mpPaymentId: String(dataId),
+        mpOrderId: String(paymentData.order?.id ?? ''),
+        paidAt,
+      }),
+      'actualización de orden a pagada'
+    );
 
     // Descontar cupos de cada regalo (transacción atómica)
     for (const item of order.items) {
-      await db.ref(`giftCatalog/${item.giftId}`).transaction((current: GiftItem | null) => {
-        if (!current) return current;
-        const newAvailable = Math.max(0, (current.availableCupos ?? 0) - item.quantity);
-        const newCurrent = (current.currentAmount ?? 0) + item.amount;
-        return {
-          ...current,
-          availableCupos: newAvailable,
-          currentAmount: newCurrent,
-        };
-      });
+      await withTimeout(
+        db.ref(`giftCatalog/${item.giftId}`).transaction((current: GiftItem | null) => {
+          if (!current) return current;
+          const newAvailable = Math.max(0, (current.availableCupos ?? 0) - item.quantity);
+          const newCurrent = (current.currentAmount ?? 0) + item.amount;
+          return {
+            ...current,
+            availableCupos: newAvailable,
+            currentAmount: newCurrent,
+          };
+        }),
+        `descuento de cupos (${item.giftId})`
+      );
     }
 
     console.log(`✅ Orden ${orderId} marcada como pagada. Cupos descontados.`);
@@ -614,7 +649,7 @@ app.get('/api/gifts/status/:orderId', async (req: Request, res: Response) => {
   }
 
   try {
-    const snap = await db.ref(`giftOrders/${orderId}`).once('value');
+    const snap = await withTimeout(db.ref(`giftOrders/${orderId}`).once('value'), 'consulta de estado de orden');
     const order = snap.val() as GiftOrder | null;
 
     if (!order) {

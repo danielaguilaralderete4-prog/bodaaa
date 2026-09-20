@@ -5,9 +5,10 @@ import { INITIAL_GIFT_ITEMS } from '../data/initialGifts';
 import { GiftItem, GiftReservation } from '../types';
 
 // ─── Backend API base URL ──────────────────────────────────────────────────────
-// In development the Vite dev server proxies /api → localhost:3001
-// In production both frontend and backend are served from the same origin.
-const API_BASE = (import.meta.env.VITE_BACKEND_URL ? import.meta.env.VITE_BACKEND_URL.replace(/\/$/, '') : '') + '/api/gifts';
+// En desarrollo el proxy de Vite redirige /api → localhost:3001.
+// En producción el backend vive en Render (dominio distinto al de Firebase
+// Hosting), así que usamos la URL absoluta definida en VITE_API_BASE_URL.
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/gifts';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

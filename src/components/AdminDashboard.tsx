@@ -777,12 +777,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Footer helper */}
-        <div className="p-4 rounded-2xl bg-[#EAE7DC] border border-[#E0D8C3] text-xs text-[#6B6B56] text-center sm:text-left">
-          <span>
-            Mostrando <strong>{filteredGuests.length}</strong> de{' '}
-            <strong>{guests.length}</strong> invitaciones registradas.
-          </span>
+        {/* Reset Database and Footer helper */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-[#EAE7DC] border border-[#E0D8C3] text-xs text-[#6B6B56]">
+          <div>
+            <span>
+              Mostrando <strong>{filteredGuests.length}</strong> de{' '}
+              <strong>{guests.length}</strong> invitaciones registradas.
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              if (
+                confirm(
+                  '¿Deseas restaurar la base de datos de invitados a los valores iniciales de prueba?'
+                )
+              ) {
+                resetAllToDefault();
+              }
+            }}
+            className="text-xs text-[#5A5A40] hover:underline font-semibold"
+          >
+            Restaurar Base de Datos Inicial de Prueba
+          </button>
         </div>
           </div>
         )}
