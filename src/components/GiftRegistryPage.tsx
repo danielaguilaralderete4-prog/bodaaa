@@ -222,7 +222,7 @@ const PaymentResultPage: React.FC<{
 };
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export const GiftRegistryPage: React.FC = () => {
+export const GiftRegistryPage: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const { giftItems, isLoading, initiateGiftPayment } = useGiftContext();
 
   // URL params para resultado de pago
@@ -356,6 +356,22 @@ export const GiftRegistryPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8F4EC] px-4 py-10 text-[#18243D] sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
+        <div className="mb-6 flex items-center justify-between gap-3 rounded-full border border-[#D8C29A] bg-[#FBF8F1] px-3 py-2 shadow-sm">
+          <button
+            type="button"
+            onClick={() => (onClose ? onClose() : window.history.back())}
+            className="inline-flex items-center gap-2 rounded-full border border-[#D8C29A] bg-white px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#18243D] transition hover:bg-[#F1E9DD]"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+            Volver
+          </button>
+
+          <div className="text-center text-[10px] font-semibold uppercase tracking-[0.25em] text-[#8D8741]">
+            Lista de regalos
+          </div>
+
+          <div className="w-20" />
+        </div>
 
         {/* ── Header ── */}
         <div className="mb-10 flex flex-col items-center text-center">
@@ -366,7 +382,7 @@ export const GiftRegistryPage: React.FC = () => {
             Lista de regalos simbólicos
           </span>
           <h1 className="font-serif-display text-4xl font-bold text-[#18243D] sm:text-5xl">
-            Nuestra lista de novios
+            Nuestra lista de regalos
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#536078]">
             El mejor regalo es compartir este día con nosotros. Si desean acompañarnos en este nuevo

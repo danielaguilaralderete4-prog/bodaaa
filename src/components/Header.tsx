@@ -57,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
               href="#gifts"
               className="text-xs uppercase tracking-[0.2em] font-medium text-[#536078] hover:text-[#18243D] transition-colors"
             >
-              Lista de Novios
+              Lista de Regalos
             </a>
             <a
               href="#rsvp"

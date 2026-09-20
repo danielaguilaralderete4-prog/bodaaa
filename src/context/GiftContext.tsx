@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
 import { onValue, push, ref, remove, set } from 'firebase/database';
 import { auth, realtimeDb } from '../lib/firebase';
 import { INITIAL_GIFT_ITEMS } from '../data/initialGifts';
@@ -75,25 +76,37 @@ export const GiftProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    const reservationsUnsubscribe = onValue(
-      ref(realtimeDb, 'giftOrders'),
-      (snapshot) => {
-        const value = snapshot.val() as Record<string, GiftReservation> | null;
-        if (value) {
-          const items = Object.entries(value).map(([id, order]) => ({ ...order, id }));
-          setGiftReservations(items);
-        } else {
+    let unsubscribeOrders: (() => void) | undefined;
+
+    const reservationsUnsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribeOrders?.();
+
+      if (!user) {
+        setGiftReservations([]);
+        return;
+      }
+
+      unsubscribeOrders = onValue(
+        ref(realtimeDb, 'giftOrders'),
+        (snapshot) => {
+          const value = snapshot.val() as Record<string, GiftReservation> | null;
+          if (value) {
+            const items = Object.entries(value).map(([id, order]) => ({ ...order, id }));
+            setGiftReservations(items);
+          } else {
+            setGiftReservations([]);
+          }
+        },
+        (error) => {
+          console.warn('Error loading gift orders:', error);
           setGiftReservations([]);
         }
-      },
-      (error) => {
-        console.warn('Error loading gift orders:', error);
-        setGiftReservations([]);
-      }
-    );
+      );
+    });
 
     return () => {
       catalogUnsubscribe();
+      unsubscribeOrders?.();
       reservationsUnsubscribe();
     };
   }, []);

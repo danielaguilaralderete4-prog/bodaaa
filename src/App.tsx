@@ -77,23 +77,36 @@ export default function App() {
     setIsPasswordModalOpen(true);
   };
 
-  useEffect(() => {
+  const syncGiftPageState = () => {
     const params = new URLSearchParams(window.location.search);
     setShowGiftPage(params.get('page') === 'regalos');
+  };
+
+  useEffect(() => {
+    syncGiftPageState();
+
+    const handleLocationChange = () => syncGiftPageState();
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
   }, []);
 
   const openGiftPage = () => {
     const url = new URL(window.location.href);
     url.searchParams.set('page', 'regalos');
     window.history.pushState({}, '', url);
-    setShowGiftPage(true);
+    syncGiftPageState();
   };
 
   const openInvitationPage = () => {
     const url = new URL(window.location.href);
     url.searchParams.delete('page');
     window.history.pushState({}, '', url);
-    setShowGiftPage(false);
+    syncGiftPageState();
   };
 
   return (
@@ -101,7 +114,7 @@ export default function App() {
       <GuestProvider>
         <div className="min-h-screen bg-[#F8F4EC] text-[#3B3B3B] font-sans antialiased selection:bg-[#E8DFCF] selection:text-[#18243D] relative">
           {showGiftPage ? (
-            <GiftRegistryPage />
+            <GiftRegistryPage onClose={openInvitationPage} />
           ) : (
             <>
               {/* Floating Music Button visible at bottom right */}

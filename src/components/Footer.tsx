@@ -41,7 +41,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenGiftPage }) => {
             onClick={onOpenGiftPage}
             className="hover:text-[#333333] transition-colors"
           >
-            Lista de Novios
+            Lista de Regalos
           </button>
           <a href="#rsvp" className="hover:text-[#333333] transition-colors">
             Confirmar Asistencia

@@ -13,8 +13,6 @@ export const WEDDING_DETAILS = {
   ceremonyTime: '15:30 Hrs',
   rsvpDeadline: '12 de Octubre, 2026',
   googleMapsUrl: 'https://maps.app.goo.gl/h3vNFbHpCvgvdFx27',
-  parisNoviosUrl: 'https://club.noviosparis.cl/home/couple-catalog/21054461',
-  parisNoviosCode: '21054461',
   contactWhatsApp: '+56954401828'
 };
 

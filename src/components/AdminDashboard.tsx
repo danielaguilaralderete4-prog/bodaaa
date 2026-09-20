@@ -204,6 +204,32 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
     setEditingGuest(null);
   };
 
+  const handleGiftImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setGiftError('El archivo seleccionado debe ser una imagen.');
+      return;
+    }
+
+    if (file.size > 4 * 1024 * 1024) {
+      setGiftError('La imagen debe pesar menos de 4 MB para que se vea bien en la invitación.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result : '';
+      setGiftForm((current) => ({ ...current, imageUrl: result }));
+      setGiftError(null);
+    };
+    reader.onerror = () => {
+      setGiftError('No se pudo leer la imagen seleccionada. Intenta nuevamente.');
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleGiftFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!giftForm.name.trim()) {
@@ -814,7 +840,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 </div>
                 <div>
                   <h3 className="font-serif-display font-bold text-base sm:text-lg text-[#333333]">
-                    Lista de Novios Simbólica — Mercado Pago &amp; Firebase Realtime
+                    Lista de Regalos Simbólica — Mercado Pago & Firebase Realtime
                   </h3>
                   <p className="text-xs sm:text-sm text-[#6B6B56] leading-relaxed mt-0.5 max-w-3xl">
                     Administra los regalos simbólicos, precios por cupo y cupos disponibles. Al recibir pagos digitales en Mercado Pago, el backend descuenta los cupos automáticamente y te envía una alerta a <strong>danielaguilaralderete4@gmail.com</strong>.
@@ -1510,7 +1536,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                   {editingGift ? 'Editar Regalo Simbólico' : 'Nuevo Regalo Simbólico'}
                 </h3>
                 <span className="text-xs text-[#6B6B56]">
-                  {editingGift ? `Modificando: ${editingGift.name}` : 'Añadir un regalo a la lista de novios'}
+                  {editingGift ? `Modificando: ${editingGift.name}` : 'Añadir un regalo a la lista de regalos'}
                 </span>
               </div>
               <button
@@ -1554,15 +1580,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
               <div>
                 <label className="block text-xs uppercase tracking-wider font-semibold text-[#5A5A40] mb-1">
-                  URL de la Foto / Imagen
+                  Foto / Imagen del regalo
                 </label>
-                <input
-                  type="url"
-                  value={giftForm.imageUrl}
-                  onChange={(e) => setGiftForm({ ...giftForm, imageUrl: e.target.value })}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-white border border-[#E0D8C3] rounded-xl px-3.5 py-2.5 text-sm focus:border-[#5A5A40] outline-none"
-                />
+                <div className="space-y-2">
+                  <input
+                    type="url"
+                    value={giftForm.imageUrl}
+                    onChange={(e) => setGiftForm({ ...giftForm, imageUrl: e.target.value })}
+                    placeholder="https://images.unsplash.com/..."
+                    className="w-full bg-white border border-[#E0D8C3] rounded-xl px-3.5 py-2.5 text-sm focus:border-[#5A5A40] outline-none"
+                  />
+                  <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-[#D8C29A] bg-[#F8F4EC] px-3 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-[#5A5A40] transition hover:bg-[#EAE7DC]">
+                    <Image className="w-4 h-4" />
+                    <span>Subir imagen desde tu computador</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={handleGiftImageUpload} />
+                  </label>
+                  <p className="text-[10px] text-[#6B6B56] leading-relaxed">
+                    Si prefieres, puedes subir una imagen local aquí. Para una invitación pública, funciona bien con archivos pequeños (hasta 4 MB).
+                    Si quieres una solución más profesional para muchas fotos, conviene usar Firebase Storage o Cloudinary en una segunda etapa.
+                  </p>
+                </div>
                 {giftForm.imageUrl && (
                   <div className="mt-2 h-28 rounded-xl overflow-hidden bg-[#EAE7DC] border border-[#E0D8C3]">
                     <img
