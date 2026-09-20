@@ -423,6 +423,40 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
       ? email.trim().toLowerCase()
       : 'invitado@boda.cl';
 
+    if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
+      res.status(400).json({ error: 'El total del aporte debe ser mayor a cero.' });
+      return;
+    }
+
+    for (const item of items) {
+      if (!item?.giftId || !Number.isInteger(item.quantity) || item.quantity < 1 || !Number.isFinite(item.amount) || item.amount <= 0) {
+        res.status(400).json({ error: 'Cada regalo debe tener una cantidad y un monto válidos.' });
+        return;
+      }
+    }
+
+    const aggregatedItems = new Map<string, CartItem>();
+    for (const item of items) {
+      const current = aggregatedItems.get(item.giftId);
+      if (current) {
+        aggregatedItems.set(item.giftId, {
+          ...current,
+          quantity: current.quantity + item.quantity,
+          amount: current.amount + item.amount,
+        });
+      } else {
+        aggregatedItems.set(item.giftId, { ...item });
+      }
+    }
+
+    const normalizedItems = Array.from(aggregatedItems.values()).sort((a, b) => a.giftName.localeCompare(b.giftName));
+    const totalByItems = normalizedItems.reduce((sum, item) => sum + item.amount, 0);
+
+    if (Math.abs(totalAmount - totalByItems) > 1) {
+      res.status(400).json({ error: 'El total del aporte no coincide con la suma de los regalos seleccionados.' });
+      return;
+    }
+
     // ── Validar cupos disponibles ──────────────────────────────────────────
     const catalogSnap = await withTimeout(db.ref('giftCatalog').once('value'), 'validación de cupos');
     const catalog = catalogSnap.val() as Record<string, GiftItem> | null;
@@ -432,7 +466,7 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
       return;
     }
 
-    for (const item of items) {
+    for (const item of normalizedItems) {
       const gift = catalog[item.giftId];
       if (!gift) {
         res.status(400).json({ error: `Regalo no encontrado: ${item.giftId}` });
@@ -448,7 +482,6 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
         });
         return;
       }
-      // Validate amount integrity (prevent price tampering)
       const expectedAmount = gift.pricePerCup * item.quantity;
       if (Math.abs(item.amount - expectedAmount) > 1) {
         res.status(400).json({ error: `Monto incorrecto para "${gift.name}"` });
@@ -461,9 +494,9 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
       id: orderId,
       guestName: guestName.trim(),
       email: guestEmail,
-      phone: phone?.trim(),
-      message: message?.trim(),
-      items,
+      phone: phone?.trim() || "",
+      message: message?.trim() || "",
+      items: normalizedItems,
       totalAmount,
       status: 'pending',
       createdAt: new Date().toISOString(),
@@ -472,14 +505,14 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
     await withTimeout(db.ref(`giftOrders/${orderId}`).set(order), 'guardado de orden');
 
     // ── Crear Preference en Mercado Pago ──────────────────────────────────
-    const appBaseUrl = req.headers.origin || allowedOrigins[0];
+    const appBaseUrl = (process.env.FRONTEND_URL || process.env.APP_URL || allowedOrigins[0] || 'http://localhost:3000').replace(/\/$/, '');
 
-    const mpItems = items.map((item) => ({
+    const mpItems = normalizedItems.map((item) => ({
       id: item.giftId,
       title: item.giftName,
       description: `${item.quantity} cupo${item.quantity > 1 ? 's' : ''} — Lista de regalos Bárbara & Daniel`,
       quantity: item.quantity,
-      unit_price: Math.round(item.amount / item.quantity), // price per unit in CLP
+      unit_price: Math.round(item.amount / item.quantity),
       currency_id: 'CLP',
     }));
 
