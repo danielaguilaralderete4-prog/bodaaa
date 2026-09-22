@@ -28,7 +28,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenGiftPage }) => {
             Inicio
           </a>
           <a href="#details" className="hover:text-[#333333] transition-colors">
-            Nuestra Historia
+            Con La Bendición de Dios
           </a>
           <a href="#event" className="hover:text-[#333333] transition-colors">
             El Evento

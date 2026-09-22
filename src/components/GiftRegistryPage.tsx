@@ -239,6 +239,11 @@ export const GiftRegistryPage: React.FC<{ onClose?: () => void }> = ({ onClose }
     }
   }, []);
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   // Cart state
   const [cart, setCart] = useState<Record<string, number>>({});
   const [showCart, setShowCart] = useState(false);
