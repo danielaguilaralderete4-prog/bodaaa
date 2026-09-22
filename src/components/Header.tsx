@@ -22,7 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
             href="#details"
             className="text-xs uppercase tracking-[0.2em] font-medium text-[#536078] hover:text-[#18243D] transition-colors whitespace-nowrap"
           >
-            Nuestra Historia
+            Con La Bendición de Dios
           </a>
           <a
             href="#event"
@@ -31,10 +31,10 @@ export const Header: React.FC<HeaderProps> = ({
             El Evento
           </a>
           <a
-            href="#protocol"
+            href="#suggestions"
             className="text-xs uppercase tracking-[0.2em] font-medium text-[#536078] hover:text-[#18243D] transition-colors whitespace-nowrap"
           >
-            Protocolo
+            Sugerencias
           </a>
         </nav>
 
