@@ -814,6 +814,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
                                 setDeletingGuestId(g.id);
                                 try {
                                   await deleteGuest(g.id);
+                                  setDeletingGuestId(null);
                                 } catch (error) {
                                   console.error('Error al eliminar invitado:', error);
                                   alert('Hubo un error al eliminar el invitado. Intenta de nuevo.');

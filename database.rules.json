@@ -10,9 +10,7 @@
     },
     "guestResponses": {
       ".read": "auth != null",
-      "$responseId": {
-        ".write": "!data.exists() && newData.exists()"
-      }
+      ".write": "auth != null"
     },
     "giftCatalog": {
       ".read": true,
