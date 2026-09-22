@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGuests } from '../context/GuestContext';
 import { useGiftContext } from '../context/GiftContext';
+import { Toast } from './Toast';
 import { Guest, GiftItem, GiftReservation } from '../types';
 import {
   Users,
@@ -39,6 +40,8 @@ import {
   Loader2,
   ChevronDown,
   ChevronUp,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 
 const formatCLP = (v: number) =>
@@ -47,9 +50,11 @@ const formatCLP = (v: number) =>
 
 interface AdminDashboardProps {
   onClose: () => void;
+  isPlayingMusic: boolean;
+  onToggleMusic: () => void;
 }
 
-export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayingMusic, onToggleMusic }) => {
   const {
     guests,
     metrics,
@@ -83,6 +88,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
   const [simulatedEmailGuest, setSimulatedEmailGuest] = useState<Guest | null>(null);
   const [copiedGuestId, setCopiedGuestId] = useState<string | null>(null);
+  const [deletingGuestId, setDeletingGuestId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const getGuestInvitationUrl = (guest: Guest) => {
     const baseUrl = window.location.origin + window.location.pathname;
@@ -184,6 +191,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
       setNewSpots(2);
       setNewPhone('');
       setFormError(null);
+      setToastMessage('✅ Invitado agregado correctamente');
+      setTimeout(() => setToastMessage(null), 3000);
     } else {
       setFormError(res.message);
     }
@@ -403,6 +412,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
                 </button>
               </>
             )}
+            <button
+              onClick={onToggleMusic}
+              title={isPlayingMusic 
+                ? 'Pausar música - Reduce distracciones mientras trabajas' 
+                : 'Reproducir música - Ambientación de fondo'}
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
+                isPlayingMusic
+                  ? 'bg-[#5A5A40] text-white hover:bg-[#474732]'
+                  : 'bg-[#EAE7DC] text-[#5A5A40] hover:bg-[#E0D8C3]'
+              }`}
+            >
+              {isPlayingMusic ? (
+                <Volume2 className="w-4 h-4" />
+              ) : (
+                <VolumeX className="w-4 h-4" />
+              )}
+            </button>
             <button
               onClick={onClose}
               className="w-9 h-9 rounded-full bg-[#EAE7DC] hover:bg-[#E0D8C3] flex items-center justify-center text-[#5A5A40] transition-colors"
@@ -783,15 +809,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
 
                           {/* Delete */}
                           <button
-                            onClick={() => {
+                            onClick={async () => {
                               if (confirm(`¿Eliminar a ${g.nombre_principal}?`)) {
-                                deleteGuest(g.id);
+                                setDeletingGuestId(g.id);
+                                try {
+                                  await deleteGuest(g.id);
+                                } catch (error) {
+                                  console.error('Error al eliminar invitado:', error);
+                                  alert('Hubo un error al eliminar el invitado. Intenta de nuevo.');
+                                  setDeletingGuestId(null);
+                                }
                               }
                             }}
+                            disabled={deletingGuestId === g.id}
                             title="Eliminar invitado"
-                            className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                            className={`p-1.5 rounded-lg transition-colors ${
+                              deletingGuestId === g.id
+                                ? 'text-red-400 bg-red-50 cursor-not-allowed opacity-60'
+                                : 'text-red-600 hover:bg-red-50'
+                            }`}
                           >
-                            <Trash2 className="w-4 h-4" />
+                            {deletingGuestId === g.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
                           </button>
                         </div>
                       </td>
@@ -1718,6 +1760,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose }) => {
             </form>
           </div>
         </div>
+      )}
+
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          type="success"
+          duration={3000}
+          onClose={() => setToastMessage(null)}
+        />
       )}
     </div>
   );

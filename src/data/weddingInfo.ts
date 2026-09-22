@@ -11,7 +11,7 @@ export const WEDDING_DETAILS = {
   venueName: 'Centro eventos Matri',
   venueAddress: 'Ruta 215 7020, Osorno, Los Lagos, Chile',
   ceremonyTime: '15:30 Hrs',
-  rsvpDeadline: '12 de Octubre, 2026',
+  rsvpDeadline: '30 DE OCTUBRE, 2026',
   googleMapsUrl: 'https://maps.app.goo.gl/h3vNFbHpCvgvdFx27',
   contactWhatsApp: '+56954401828'
 };

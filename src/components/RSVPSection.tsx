@@ -37,6 +37,7 @@ export const RSVPSection: React.FC = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [alreadyConfirmedAlert, setAlreadyConfirmedAlert] = useState(false);
   const [confirmedData, setConfirmedData] = useState<{
     guest: Guest;
     message: string;
@@ -70,7 +71,9 @@ export const RSVPSection: React.FC = () => {
     setNotFoundAlert(false);
     setPhoneNumber(guest.telefono || '');
 
+    // Check if already confirmed
     if (guest.confirmado && guest.asistira !== null) {
+      setAlreadyConfirmedAlert(true);
       setAttending(guest.asistira);
       if (guest.cupos_confirmados > 0) {
         setGuestCount(Math.min(guest.cupos_confirmados, guest.cupos_totales));
@@ -85,6 +88,7 @@ export const RSVPSection: React.FC = () => {
       }
       if (guest.mensaje_novios) setLoveNote(guest.mensaje_novios);
     } else {
+      setAlreadyConfirmedAlert(false);
       setAttending(true);
       // Default to their maximum assigned spots
       setGuestCount(guest.cupos_totales);
@@ -205,6 +209,7 @@ export const RSVPSection: React.FC = () => {
     setPhoneNumber('');
     setLoveNote('');
     setErrorMessage(null);
+    setAlreadyConfirmedAlert(false);
   };
 
   return (
@@ -397,6 +402,21 @@ export const RSVPSection: React.FC = () => {
             ) : (
               /* STEP 2: Personalized RSVP Form (Strictly Limited to Assigned Spots) */
               <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
+                {/* Banner: Already Confirmed */}
+                {alreadyConfirmedAlert && (
+                  <div className="p-4 sm:p-5 rounded-2xl bg-blue-50 border border-blue-200 flex items-start gap-3 shadow-sm">
+                    <CheckCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-blue-900">
+                        Ya has confirmado tu asistencia
+                      </p>
+                      <p className="text-xs text-blue-800 mt-0.5">
+                        Puedes actualizar tu respuesta abajo si necesitas hacer cambios.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Personalized Welcome Banner */}
                 <div className="p-4 sm:p-5 rounded-2xl bg-[#EAE7DC] border-2 border-[#BC986A]/60 flex items-start justify-between gap-3 shadow-inner">
                   <div className="flex items-start gap-3">

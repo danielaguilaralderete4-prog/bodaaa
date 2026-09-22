@@ -35,7 +35,9 @@ export const FloatingMusicButton: React.FC<FloatingMusicButtonProps> = ({
         type="button"
         onClick={handleButtonClick}
         id="btn-floating-music"
-        title={isPlaying ? 'Pausar música' : 'Reproducir "Caminar de tu mano" - Río Roma ft. Fonseca'}
+        title={isPlaying 
+          ? 'Pausar música - Reduce distracciones mientras lees' 
+          : 'Reproducir "Caminar de tu mano" - Río Roma ft. Fonseca'}
         className={`flex items-center gap-3 px-4 py-2.5 sm:py-3 rounded-full shadow-2xl border-2 transition-all duration-300 transform active:scale-95 hover:scale-105 cursor-pointer backdrop-blur-md ${
           isPlaying
             ? 'bg-[#5A5A40] text-white border-[#BC986A] shadow-[#5A5A40]/50 ring-4 ring-[#5A5A40]/25'

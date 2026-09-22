@@ -14,6 +14,7 @@ import {PasswordModal} from './components/PasswordModal';
 import {MobileBottomNav} from './components/MobileBottomNav';
 import {Footer} from './components/Footer';
 import {FloatingMusicButton} from './components/FloatingMusicButton';
+import { Toast } from './components/Toast';
 import {getSavedAudioUrl} from './utils/audioStorage';
 import {weddingAudio} from './utils/audioEngine';
 import defaultWeddingSong from './assets/audio/caminar-de-tu-mano.mp3';
@@ -28,6 +29,39 @@ export default function App() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
   const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
+  const [musicStateBeforeAdmin, setMusicStateBeforeAdmin] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Load music preference from localStorage
+  useEffect(() => {
+    const savedMusicState = localStorage.getItem('weddingMusicPlaying');
+    const shouldPlayMusic = savedMusicState !== 'false'; // Default to true
+    setIsPlayingMusic(shouldPlayMusic);
+  }, []);
+
+  // Save music preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('weddingMusicPlaying', String(isPlayingMusic));
+  }, [isPlayingMusic]);
+
+  // Setup audio engine callback for volume changes
+  useEffect(() => {
+    weddingAudio.setVolumeChangeCallback((message) => {
+      setToastMessage(message);
+    });
+  }, []);
+
+  // Sync audio playback with isPlayingMusic state
+  useEffect(() => {
+    if (isPlayingMusic && !weddingAudio.getPlayingState()) {
+      weddingAudio.resetPlayState(); // Reset to start at normal volume
+      weddingAudio.start().catch(() => {
+        console.warn('Could not auto-start music');
+      });
+    } else if (!isPlayingMusic && weddingAudio.getPlayingState()) {
+      weddingAudio.stop();
+    }
+  }, [isPlayingMusic]);
 
   useEffect(() => {
     weddingAudio.setCustomAudioUrl(defaultWeddingSong);
@@ -43,9 +77,8 @@ export default function App() {
 
     // Browser audio policy: user gesture handler
     const handleFirstUserInteraction = () => {
-      if (!weddingAudio.getPlayingState()) {
+      if (!weddingAudio.getPlayingState() && isPlayingMusic) {
         weddingAudio.start();
-        setIsPlayingMusic(true);
       }
     };
 
@@ -56,7 +89,7 @@ export default function App() {
       window.removeEventListener('click', handleFirstUserInteraction);
       window.removeEventListener('touchstart', handleFirstUserInteraction);
     };
-  }, []);
+  }, [isPlayingMusic]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -71,6 +104,20 @@ export default function App() {
 
   const handleAdminToggle = () => {
     if (isAdminAuthenticated) {
+      if (!isAdminOpen) {
+        // Opening admin panel: save current state and pause music
+        setMusicStateBeforeAdmin(isPlayingMusic);
+        if (isPlayingMusic) {
+          weddingAudio.stop();
+          setIsPlayingMusic(false);
+        }
+      } else {
+        // Closing admin panel: restore previous music state
+        if (musicStateBeforeAdmin) {
+          weddingAudio.start();
+          setIsPlayingMusic(true);
+        }
+      }
       setIsAdminOpen((prev) => !prev);
       return;
     }
@@ -159,8 +206,20 @@ export default function App() {
               onClose={() => {
                 setIsAdminOpen(false);
                 setIsAdminAuthenticated(false);
+                // Restore music to previous state
+                if (musicStateBeforeAdmin) {
+                  setTimeout(() => {
+                    weddingAudio.resetPlayState();
+                    weddingAudio.start().catch(() => {
+                      console.warn('Could not restore music');
+                    });
+                    setIsPlayingMusic(true);
+                  }, 200);
+                }
                 void signOut(auth);
               }}
+              isPlayingMusic={isPlayingMusic}
+              onToggleMusic={toggleMusic}
             />
           )}
 
@@ -172,6 +231,15 @@ export default function App() {
                 setIsAdminAuthenticated(true);
                 setIsAdminOpen(true);
               }}
+            />
+          )}
+
+          {toastMessage && (
+            <Toast
+              message={toastMessage}
+              type="info"
+              duration={3000}
+              onClose={() => setToastMessage(null)}
             />
           )}
         </div>

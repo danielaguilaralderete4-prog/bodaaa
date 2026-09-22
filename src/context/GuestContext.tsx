@@ -4,6 +4,7 @@ import { onValue, push, ref, remove, set, update } from 'firebase/database';
 import { auth, realtimeDb } from '../lib/firebase';
 import { Guest, AdminMetrics } from '../types';
 import { INITIAL_GUESTS } from '../data/initialGuests';
+import { saveGuestListToCache, getGuestListFromCache, clearGuestCache } from '../utils/guestCache';
 
 interface GuestContextType {
   guests: Guest[];
@@ -62,13 +63,26 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     let unsubscribeData: (() => void) | undefined;
     let privateGuests: Guest[] = [];
     let responses: Record<string, Partial<Guest>> = {};
-    const publish = () =>
-      setGuests(privateGuests.map((guest) => ({ ...guest, ...(responses[guest.id] || {}) })));
+    const publish = () => {
+      const guestList = privateGuests.map((guest) => ({ ...guest, ...(responses[guest.id] || {}) }));
+      setGuests(guestList);
+      // Save to cache whenever guests update
+      saveGuestListToCache(guestList);
+    };
 
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       unsubscribeData?.();
-      setIsLoading(true);
-      setGuests([]);
+      
+      // Try to load from cache first for instant UI
+      const cachedGuests = getGuestListFromCache();
+      if (cachedGuests && cachedGuests.length > 0) {
+        setGuests(cachedGuests);
+        setIsLoading(false);
+      } else {
+        setIsLoading(true);
+        setGuests([]);
+      }
+
       const path = user ? 'guests' : 'guestDirectory';
       unsubscribeData = onValue(
         ref(realtimeDb, path),
@@ -335,13 +349,18 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return { success: true, message: 'Invitado actualizado.' };
   };
 
-  const deleteGuest = async (id: string) => {
-    await update(ref(realtimeDb), {
-      [`guests/${id}`]: null,
-      [`guestDirectory/${id}`]: null,
-      [`guestResponses/${id}`]: null,
-    });
-    setGuests((prev) => prev.filter((g) => g.id !== id));
+  const deleteGuest = async (id: string): Promise<void> => {
+    try {
+      await update(ref(realtimeDb), {
+        [`guests/${id}`]: null,
+        [`guestDirectory/${id}`]: null,
+        [`guestResponses/${id}`]: null,
+      });
+      setGuests((prev) => prev.filter((g) => g.id !== id));
+    } catch (error) {
+      console.error('Error deleting guest:', error);
+      throw error;
+    }
   };
 
   const resetRSVP = async (id: string) => {
@@ -373,6 +392,7 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       guestResponses: null,
     });
     setGuests(INITIAL_GUESTS);
+    clearGuestCache(); // Clear cache when resetting
   };
 
   const exportGuestListCSV = () => {

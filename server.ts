@@ -35,6 +35,10 @@ const {
   ALLOWED_ORIGINS,
   PORT,
   NODE_ENV,
+  BACKEND_URL,
+  FRONTEND_URL,
+  APP_URL,
+  RENDER_EXTERNAL_URL,
 } = process.env;
 
 // Validate required env vars on startup
@@ -123,6 +127,11 @@ const app = express();
 const allowedOrigins = ALLOWED_ORIGINS
   ? ALLOWED_ORIGINS.split(',').map((o) => o.trim())
   : ['http://localhost:3000'];
+
+const backendBaseUrl = (BACKEND_URL || RENDER_EXTERNAL_URL || `http://localhost:${PORT ?? '3001'}`)
+  .replace(/\/$/, '');
+const frontendBaseUrl = (FRONTEND_URL || APP_URL || allowedOrigins[0] || backendBaseUrl)
+  .replace(/\/$/, '');
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   const origin = req.headers.origin;
@@ -326,6 +335,85 @@ async function sendNotificationEmail(order: GiftOrder): Promise<void> {
   console.log(`📧 Email de notificación enviado para orden ${order.id}`);
 }
 
+async function finalizePaidOrder(order: GiftOrder, mpPaymentId: string | number, mpOrderId?: string | number): Promise<GiftOrder> {
+  if (order.status === 'paid') {
+    return order;
+  }
+
+  const paidAt = new Date().toISOString();
+
+  await withTimeout(
+    db.ref(`giftOrders/${order.id}`).update({
+      status: 'paid',
+      mpPaymentId: String(mpPaymentId),
+      mpOrderId: String(mpOrderId ?? mpPaymentId),
+      paidAt,
+    }),
+    'actualización de orden a pagada'
+  );
+
+  for (const item of order.items) {
+    await withTimeout(
+      db.ref(`giftCatalog/${item.giftId}`).transaction((current: GiftItem | null) => {
+        if (!current) return current;
+        const newAvailable = Math.max(0, (current.availableCupos ?? 0) - item.quantity);
+        const newCurrent = (current.currentAmount ?? 0) + item.amount;
+        return {
+          ...current,
+          availableCupos: newAvailable,
+          currentAmount: newCurrent,
+        };
+      }),
+      `descuento de cupos (${item.giftId})`
+    );
+  }
+
+  const updatedOrder: GiftOrder = {
+    ...order,
+    status: 'paid',
+    mpPaymentId: String(mpPaymentId),
+    mpOrderId: String(mpOrderId ?? mpPaymentId),
+    paidAt,
+  };
+
+  await sendNotificationEmail(updatedOrder);
+  return updatedOrder;
+}
+
+async function reconcileOrderWithMp(orderId: string): Promise<GiftOrder | null> {
+  const orderSnap = await withTimeout(db.ref(`giftOrders/${orderId}`).once('value'), 'lectura de orden (reconciliación)');
+  const order = orderSnap.val() as GiftOrder | null;
+
+  if (!order) {
+    return null;
+  }
+
+  if (order.status === 'paid') {
+    return order;
+  }
+
+  try {
+    const search = await paymentClient.search({
+      options: {
+        external_reference: orderId,
+        limit: 5,
+        sort: 'date_created',
+        criteria: 'desc',
+      },
+    });
+
+    const approved = search.results?.find((payment) => payment.status === 'approved');
+    if (!approved) {
+      return order;
+    }
+
+    return await finalizePaidOrder(order, approved.id ?? orderId, approved.id ?? orderId);
+  } catch (error) {
+    console.warn(`⚠️  No se pudo reconciliar la orden ${orderId} con Mercado Pago:`, error);
+    return order;
+  }
+}
+
 // ─── ROUTES ──────────────────────────────────────────────────────────────────
 
 app.get('/health', (_req: Request, res: Response) => {
@@ -505,8 +593,6 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
     await withTimeout(db.ref(`giftOrders/${orderId}`).set(order), 'guardado de orden');
 
     // ── Crear Preference en Mercado Pago ──────────────────────────────────
-    const appBaseUrl = (process.env.FRONTEND_URL || process.env.APP_URL || allowedOrigins[0] || 'http://localhost:3000').replace(/\/$/, '');
-
     const mpItems = normalizedItems.map((item) => ({
       id: item.giftId,
       title: item.giftName,
@@ -524,12 +610,12 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
           email: guestEmail,
         },
         back_urls: {
-          success: `${appBaseUrl}/?page=regalos&payment_status=approved&order_id=${orderId}`,
-          failure: `${appBaseUrl}/?page=regalos&payment_status=failed&order_id=${orderId}`,
-          pending: `${appBaseUrl}/?page=regalos&payment_status=pending&order_id=${orderId}`,
+          success: `${frontendBaseUrl}/?page=regalos&payment_status=approved&order_id=${orderId}`,
+          failure: `${frontendBaseUrl}/?page=regalos&payment_status=failed&order_id=${orderId}`,
+          pending: `${frontendBaseUrl}/?page=regalos&payment_status=pending&order_id=${orderId}`,
         },
         auto_return: 'approved',
-        notification_url: `${process.env.BACKEND_URL ?? appBaseUrl}/api/gifts/mp-webhook`,
+        notification_url: `${backendBaseUrl}/api/gifts/mp-webhook`,
         external_reference: orderId,
         statement_descriptor: 'BODA B&D 2026',
         expires: true,
@@ -617,52 +703,11 @@ app.post('/api/gifts/mp-webhook', async (req: Request, res: Response) => {
       return;
     }
 
-    if (order.status === 'paid') {
-      console.log(`ℹ️  Orden ${orderId} ya está pagada — ignorando duplicado`);
-      return;
-    }
-
-    const paidAt = new Date().toISOString();
-
-    // Actualizar la orden a 'paid'
-    await withTimeout(
-      db.ref(`giftOrders/${orderId}`).update({
-        status: 'paid',
-        mpPaymentId: String(dataId),
-        mpOrderId: String(paymentData.order?.id ?? ''),
-        paidAt,
-      }),
-      'actualización de orden a pagada'
-    );
-
-    // Descontar cupos de cada regalo (transacción atómica)
-    for (const item of order.items) {
-      await withTimeout(
-        db.ref(`giftCatalog/${item.giftId}`).transaction((current: GiftItem | null) => {
-          if (!current) return current;
-          const newAvailable = Math.max(0, (current.availableCupos ?? 0) - item.quantity);
-          const newCurrent = (current.currentAmount ?? 0) + item.amount;
-          return {
-            ...current,
-            availableCupos: newAvailable,
-            currentAmount: newCurrent,
-          };
-        }),
-        `descuento de cupos (${item.giftId})`
-      );
-    }
-
+    const updatedOrder = await finalizePaidOrder(order, dataId, paymentData.order?.id ?? dataId);
     console.log(`✅ Orden ${orderId} marcada como pagada. Cupos descontados.`);
-
-    // Enviar email de notificación
-    const updatedOrder: GiftOrder = {
-      ...order,
-      status: 'paid',
-      mpPaymentId: String(dataId),
-      paidAt,
-    };
-
-    await sendNotificationEmail(updatedOrder);
+    if (updatedOrder.status === 'paid') {
+      console.log(`✅ Orden ${orderId} actualizada correctamente desde el webhook de Mercado Pago.`);
+    }
   } catch (err) {
     console.error('Error procesando webhook MP:', err);
   }
@@ -682,8 +727,7 @@ app.get('/api/gifts/status/:orderId', async (req: Request, res: Response) => {
   }
 
   try {
-    const snap = await withTimeout(db.ref(`giftOrders/${orderId}`).once('value'), 'consulta de estado de orden');
-    const order = snap.val() as GiftOrder | null;
+    const order = await reconcileOrderWithMp(orderId);
 
     if (!order) {
       res.status(404).json({ error: 'Orden no encontrada' });
