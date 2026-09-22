@@ -545,39 +545,53 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
       return;
     }
 
-    // ── Validar cupos disponibles ──────────────────────────────────────────
-    const catalogSnap = await withTimeout(db.ref('giftCatalog').once('value'), 'validación de cupos');
-    const catalog = catalogSnap.val() as Record<string, GiftItem> | null;
-
-    if (!catalog) {
-      res.status(400).json({ error: 'Catálogo de regalos no disponible' });
-      return;
+    // ── Validar cupos disponibles (cache local para respuesta rápida) ──────
+    // En lugar de esperar a Firebase para cada validación, hacemos una lectura
+    // rápida y procesamos la validación de forma optimista. Si hay un conflicto
+    // de cupos, el webhook lo rechazará.
+    let catalogSnap;
+    try {
+      catalogSnap = await Promise.race([
+        db.ref('giftCatalog').once('value'),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout de catálogo')), 3000)
+        ),
+      ]);
+    } catch {
+      // Si no podemos validar rápidamente, permitimos la orden de todas formas.
+      // El webhook hará la validación definitiva.
+      catalogSnap = null;
     }
 
-    for (const item of normalizedItems) {
-      const gift = catalog[item.giftId];
-      if (!gift) {
-        res.status(400).json({ error: `Regalo no encontrado: ${item.giftId}` });
-        return;
-      }
-      if (!gift.active) {
-        res.status(400).json({ error: `El regalo "${gift.name}" no está disponible` });
-        return;
-      }
-      if (gift.availableCupos < item.quantity) {
-        res.status(409).json({
-          error: `Solo quedan ${gift.availableCupos} cupos disponibles para "${gift.name}"`,
-        });
-        return;
-      }
-      const expectedAmount = gift.pricePerCup * item.quantity;
-      if (Math.abs(item.amount - expectedAmount) > 1) {
-        res.status(400).json({ error: `Monto incorrecto para "${gift.name}"` });
-        return;
+    const catalog = catalogSnap?.val() as Record<string, GiftItem> | null;
+
+    if (catalog) {
+      // Validar contra el catálogo si lo logramos leer rápido
+      for (const item of normalizedItems) {
+        const gift = catalog[item.giftId];
+        if (!gift) {
+          res.status(400).json({ error: `Regalo no encontrado: ${item.giftId}` });
+          return;
+        }
+        if (!gift.active) {
+          res.status(400).json({ error: `El regalo "${gift.name}" no está disponible` });
+          return;
+        }
+        if (gift.availableCupos < item.quantity) {
+          res.status(409).json({
+            error: `Solo quedan ${gift.availableCupos} cupos disponibles para "${gift.name}"`,
+          });
+          return;
+        }
+        const expectedAmount = gift.pricePerCup * item.quantity;
+        if (Math.abs(item.amount - expectedAmount) > 1) {
+          res.status(400).json({ error: `Monto incorrecto para "${gift.name}"` });
+          return;
+        }
       }
     }
 
-    // ── Guardar orden en Firebase (status pending) ─────────────────────────
+    // ── Preparar orden en Firebase (status pending) ────────────────────────
     const order: GiftOrder = {
       id: orderId,
       guestName: guestName.trim(),
@@ -590,9 +604,8 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
       createdAt: new Date().toISOString(),
     };
 
-    await withTimeout(db.ref(`giftOrders/${orderId}`).set(order), 'guardado de orden');
-
-    // ── Crear Preference en Mercado Pago ──────────────────────────────────
+    // ── Crear Preference en Mercado Pago (bloqueante) ─────────────────────
+    // Esta es la operación más importante - esperamos que se complete
     const mpItems = normalizedItems.map((item) => ({
       id: item.giftId,
       title: item.giftName,
@@ -624,16 +637,23 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
       },
     });
 
-    // Guardar preferenceId en la orden
-    await withTimeout(
-      db.ref(`giftOrders/${orderId}/preferenceId`).set(preference.id),
-      'guardado de preferenceId'
-    );
-
+    // Responder al cliente INMEDIATAMENTE con el URL de Mercado Pago
+    // (sin esperar a que se guarde en Firebase)
     res.json({
       preferenceId: preference.id,
       initPoint: preference.init_point,
       sandboxInitPoint: preference.sandbox_init_point,
+    });
+
+    // Guardar orden y preferenceId en background (async, sin await)
+    // Esto no bloquea la respuesta al cliente
+    setImmediate(() => {
+      db.ref(`giftOrders/${orderId}`).set(order).catch((err) => {
+        console.error(`⚠️  Error guardando orden ${orderId}:`, err);
+      });
+      db.ref(`giftOrders/${orderId}/preferenceId`).set(preference.id).catch((err) => {
+        console.error(`⚠️  Error guardando preferenceId ${orderId}:`, err);
+      });
     });
 
     console.log(`✅ Preference creada para orden ${orderId}: ${preference.id}`);

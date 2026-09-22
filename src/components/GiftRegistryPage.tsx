@@ -284,7 +284,17 @@ export const GiftRegistryPage: React.FC<{ onClose?: () => void }> = ({ onClose }
       if (qty <= 0) {
         setCart((p) => { const c = { ...p }; delete c[gift.id]; return c; });
       } else {
-        setCart((p) => ({ ...p, [gift.id]: clamp(qty, 1, gift.availableCupos) }));
+        setCart((p) => {
+          const newCart = { ...p, [gift.id]: clamp(qty, 1, gift.availableCupos) };
+          // Scroll to checkout when item is added
+          setTimeout(() => {
+            const checkoutSection = document.getElementById('gift-checkout');
+            if (checkoutSection) {
+              checkoutSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 150);
+          return newCart;
+        });
       }
     },
     []
@@ -531,7 +541,7 @@ export const GiftRegistryPage: React.FC<{ onClose?: () => void }> = ({ onClose }
 
         {/* ── Cart + Checkout form ── */}
         {cartEntries.length > 0 && (
-          <div className="mt-10 rounded-[2rem] border border-[#D8C29A] bg-[#FBF8F1] p-6 shadow-sm md:p-8">
+          <div id="gift-checkout" className="mt-10 rounded-[2rem] border border-[#D8C29A] bg-[#FBF8F1] p-6 shadow-sm md:p-8">
             {/* Cart header */}
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
