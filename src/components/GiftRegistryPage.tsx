@@ -155,7 +155,7 @@ const PaymentResultPage: React.FC<{
               ¡Muchas gracias!
             </h2>
             <p className="mt-4 text-base leading-relaxed text-[#536078]">
-              Tu regalo fue registrado con éxito. Bárbara y Daniel te lo agradecen de corazón. 💛
+              Su regalo fue registrado con éxito. Bárbara y Daniel te lo agradecen de corazón. 💛
             </p>
             {order && (
               <div className="mt-6 rounded-2xl border border-[#D8C29A] bg-[#FBF8F1] p-5 text-left text-sm text-[#18243D]">
@@ -179,7 +179,7 @@ const PaymentResultPage: React.FC<{
             )}
             <div className="mt-6 flex items-center justify-center gap-2 rounded-2xl bg-[#EEF3F0] px-4 py-3 text-xs text-[#18243D]">
               <ShieldCheck className="h-4 w-4 text-[#18243D]" />
-              <span>Pago procesado de forma segura por Mercado Pago</span>
+              <span>Su pago fue procesado de forma segura por Mercado Pago</span>
             </div>
           </>
         ) : status === 'pending' ? (
@@ -191,7 +191,7 @@ const PaymentResultPage: React.FC<{
               Pago en proceso
             </h2>
             <p className="mt-4 text-base text-[#536078]">
-              Tu pago está siendo procesado. Te notificaremos cuando esté confirmado.
+              Su pago está siendo procesado. Le notificaremos cuando esté confirmado.
             </p>
           </>
         ) : (
@@ -203,7 +203,7 @@ const PaymentResultPage: React.FC<{
               Pago no completado
             </h2>
             <p className="mt-4 text-base text-[#536078]">
-              No pudimos completar tu pago. Puedes intentarlo nuevamente.
+              No pudimos completar su pago. Puede intentarlo nuevamente.
             </p>
           </>
         )}
@@ -597,7 +597,7 @@ export const GiftRegistryPage: React.FC<{ onClose?: () => void }> = ({ onClose }
                 {/* Nombre */}
                 <label className="block">
                   <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#18243D]">
-                    ¿Quién envía este regalo? (Tu nombre o familia) *
+                    ¿Quién envía este regalo? (Su nombre o familia) *
                   </span>
                   <input
                     type="text"
@@ -605,6 +605,7 @@ export const GiftRegistryPage: React.FC<{ onClose?: () => void }> = ({ onClose }
                     value={form.guestName}
                     onChange={(e) => setForm({ ...form, guestName: e.target.value })}
                     placeholder="Ej: María Pérez o Familia Rodríguez Morales"
+                    aria-label="Ingrese su nombre o familia"
                     className={`mt-1.5 w-full rounded-2xl border bg-white px-4 py-3 text-sm outline-none transition focus:border-[#18243D] ${
                       formErrors.guestName ? 'border-red-400' : 'border-[#D8C29A]'
                     }`}
@@ -647,8 +648,8 @@ export const GiftRegistryPage: React.FC<{ onClose?: () => void }> = ({ onClose }
                 <div>
                   <strong className="block mb-0.5">Pago 100% seguro con Mercado Pago</strong>
                   <span className="text-[#536078]">
-                    Al hacer clic en "Ir al pago", serás redirigido al entorno seguro de Mercado Pago
-                    donde podrás pagar con tarjeta de crédito, débito y más medios de pago.
+                    Al hacer clic en "Ir al pago", será redirigido al entorno seguro de Mercado Pago
+                    donde podrá pagar con tarjeta de crédito, débito y más medios de pago.
                   </span>
                 </div>
               </div>

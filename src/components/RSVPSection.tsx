@@ -18,6 +18,7 @@ import {
   AlertCircle,
   X,
 } from 'lucide-react';
+import { Toast } from './Toast';
 
 export const RSVPSection: React.FC = () => {
   const { submitRSVP, findGuestByName, searchGuests, guests } = useGuests();
@@ -42,6 +43,7 @@ export const RSVPSection: React.FC = () => {
     guest: Guest;
     message: string;
   } | null>(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Check URL parameters for personalized link (e.g., ?invitado=Daniel+Morales)
   useEffect(() => {
@@ -151,7 +153,7 @@ export const RSVPSection: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedGuest) {
       setErrorMessage('Por favor busca y selecciona tu nombre de la lista.');
@@ -161,19 +163,19 @@ export const RSVPSection: React.FC = () => {
     setErrorMessage(null);
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const finalAttendees = attending
-        ? attendeeNames
-            .map((name, i) => {
-              if (i === 0 && (!name || !name.trim())) {
-                return selectedGuest.nombre_principal;
-              }
-              return name.trim();
-            })
-            .filter((n) => n.length > 0)
-        : [];
+    const finalAttendees = attending
+      ? attendeeNames
+          .map((name, i) => {
+            if (i === 0 && (!name || !name.trim())) {
+              return selectedGuest.nombre_principal;
+            }
+            return name.trim();
+          })
+          .filter((n) => n.length > 0)
+      : [];
 
-      const result = submitRSVP(selectedGuest.id, {
+    try {
+      const result = await submitRSVP(selectedGuest.id, {
         asistira: attending,
         cupos_confirmados: attending ? guestCount : 0,
         asistentes_nombres:
@@ -185,9 +187,8 @@ export const RSVPSection: React.FC = () => {
         mensaje_novios: loveNote.trim(),
       });
 
-      setIsSubmitting(false);
-
       if (result.success && result.guest) {
+        setShowSuccessToast(true);
         setConfirmedData({
           guest: result.guest,
           message: result.message,
@@ -195,7 +196,11 @@ export const RSVPSection: React.FC = () => {
       } else {
         setErrorMessage(result.message);
       }
-    }, 500);
+    } catch {
+      setErrorMessage('Ocurrió un error al enviar tu confirmación. Por favor intenta nuevamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleResetForm = () => {
@@ -247,7 +252,7 @@ export const RSVPSection: React.FC = () => {
               Sus cupos están reservados
             </p>
             <p className="text-sm text-[#6B6B56] leading-relaxed mt-2">
-              Busca su nombre para confirmar su asistencia y disfrutar juntos de este día tan especial.
+              Busque su nombre para confirmar su asistencia y disfrutar juntos de este día tan especial.
             </p>
           </div>
 
@@ -320,7 +325,7 @@ export const RSVPSection: React.FC = () => {
                     className="inline-flex items-center justify-center gap-1.5 py-3 px-6 rounded-full border border-[#E0D8C3] bg-[#FDFCF0] text-[#5A5A40] hover:bg-[#EAE7DC] text-xs uppercase tracking-wider font-medium transition-all shadow-sm"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Modificar o buscar otro nombre</span>
+                    <span>Volver</span>
                   </button>
                 </div>
               </div>
@@ -331,11 +336,11 @@ export const RSVPSection: React.FC = () => {
                   <div className="flex items-center gap-3 mb-2 text-[#5A5A40]">
                     <Search className="w-5 h-5 text-[#8D8741]" />
                     <h3 className="font-serif-display text-xl font-bold text-[#333333]">
-                      Busca tu Nombre o Familia
+                      Busque su Nombre o Familia
                     </h3>
                   </div>
                   <p className="text-xs sm:text-sm text-[#6B6B56] leading-relaxed mb-4">
-                    Escribe tu nombre y apellido (o apellido de familia) para ver sus cupos asignados:
+                    Escriba su nombre y apellido (o apellido de familia) para ver sus cupos asignados:
                   </p>
 
                   <form onSubmit={handleManualSearchSubmit} className="space-y-3">
@@ -349,6 +354,7 @@ export const RSVPSection: React.FC = () => {
                           setIsTyping(true);
                         }}
                         placeholder="Ej: Daniel Morales o Familia Soto Pérez..."
+                        aria-label="Busque su nombre o familia"
                         className="w-full bg-white border-2 border-[#E0D8C3] focus:border-[#5A5A40] focus:ring-2 focus:ring-[#EAE7DC] rounded-2xl px-4 py-3.5 text-sm sm:text-base text-[#333333] placeholder:text-[#6B6B56]/50 outline-none transition-all"
                       />
 
@@ -408,10 +414,10 @@ export const RSVPSection: React.FC = () => {
                     <CheckCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm font-semibold text-blue-900">
-                        Ya has confirmado tu asistencia
+                        Ya ha confirmado su asistencia
                       </p>
                       <p className="text-xs text-blue-800 mt-0.5">
-                        Puedes actualizar tu respuesta abajo si necesitas hacer cambios.
+                        Si necesita modificar su respuesta, comuníquese con los novios directamente.
                       </p>
                     </div>
                   </div>
@@ -632,6 +638,15 @@ export const RSVPSection: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {showSuccessToast && (
+        <Toast
+          message="¡Asistencia confirmada con éxito!"
+          type="success"
+          duration={4000}
+          onClose={() => setShowSuccessToast(false)}
+        />
+      )}
     </section>
   );
 };

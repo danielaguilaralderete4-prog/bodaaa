@@ -9,7 +9,7 @@ import { GiftItem, GiftReservation } from '../types';
 // En desarrollo el proxy de Vite redirige /api → localhost:3001.
 // En producción el backend vive en Render (dominio distinto al de Firebase
 // Hosting), así que usamos la URL absoluta definida en VITE_API_BASE_URL.
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api/gifts';
+const API_BASE = 'https://bodaaa-backend.onrender.com/api/gifts';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

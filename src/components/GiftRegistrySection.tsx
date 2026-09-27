@@ -37,7 +37,7 @@ export const GiftRegistrySection: React.FC<GiftRegistrySectionProps> = ({ onOpen
 
             <p className="text-xs sm:text-sm text-[#6B6B56] mb-4 leading-relaxed">
               Cada regalo representa un deseo de acompañarnos en nuestro nuevo hogar. 
-              Puedes elegir el que más te inspire y colaborar con los cupos que desees.
+              Puede elegir el que más le inspire y colaborar con los cupos que desee.
             </p>
           </div>
 
