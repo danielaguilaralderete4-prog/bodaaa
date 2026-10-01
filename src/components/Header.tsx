@@ -1,14 +1,16 @@
 import React from 'react';
-import { Shield } from 'lucide-react';
+import { Shield, Crown } from 'lucide-react';
 
 interface HeaderProps {
   isAdminOpen: boolean;
   onToggleAdmin: () => void;
+  isPadrinoVIP?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   isAdminOpen,
   onToggleAdmin,
+  isPadrinoVIP,
 }) => {
   return (
     <header
@@ -66,6 +68,15 @@ export const Header: React.FC<HeaderProps> = ({
               RSVP
             </a>
           </nav>
+
+          {/* Padrino VIP Badge */}
+          {isPadrinoVIP && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-[#D4AF37] text-amber-950 text-[10px] uppercase font-bold tracking-wider shadow-xs">
+              <Crown className="w-3.5 h-3.5 text-[#D4AF37]" />
+              <span className="hidden sm:inline">Padrinos de Matrimonio</span>
+              <span className="sm:hidden">Padrinos VIP</span>
+            </div>
+          )}
 
           {/* Admin Panel Toggle */}
           <button

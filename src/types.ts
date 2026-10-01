@@ -12,7 +12,9 @@ export interface Guest {
   telefono?: string;
   email?: string;
   mesa_asignada?: string;
-  categoria?: 'Familia Novia' | 'Familia Novio' | 'Amigos Novia' | 'Amigos Novio' | 'Universidad' | 'Trabajo' | 'Testigos' | 'General';
+  categoria?: 'Familia Novia' | 'Familia Novio' | 'Amigos Novia' | 'Amigos Novio' | 'Universidad' | 'Trabajo' | 'Testigos' | 'Padrinos' | 'General';
+  es_padrino?: boolean;
+  acepto_padrino?: boolean | null; // true = aceptó rol de padrino, false = declinó rol, null = pendiente
 }
 
 export interface TimelineEvent {

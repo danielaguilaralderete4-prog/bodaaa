@@ -1,10 +1,14 @@
 import React from 'react';
 import { CountdownTimer } from './CountdownTimer';
 import { WEDDING_DETAILS } from '../data/weddingInfo';
-import { Heart, Calendar, MapPin, ChevronDown } from 'lucide-react';
+import { Heart, Calendar, MapPin, ChevronDown, Crown } from 'lucide-react';
 import heroCouple from '../assets/images/hero-new.jpeg';
 
-export const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  isPadrinoVIP?: boolean;
+}
+
+export const HeroSection: React.FC<HeroSectionProps> = ({ isPadrinoVIP }) => {
   return (
     <section
       id="hero"
@@ -25,6 +29,14 @@ export const HeroSection: React.FC = () => {
 
       {/* Main Hero Card Container */}
       <div className="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center text-center animate-fade-in">
+        {/* Padrino VIP Badge */}
+        {isPadrinoVIP && (
+          <div className="relative top-4 sm:top-1 inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-[#18243D]/90 text-[#D4AF37] border-2 border-[#D4AF37] text-xs font-bold uppercase tracking-[0.2em] shadow-lg backdrop-blur-md mb-2">
+            <Crown className="w-4 h-4 text-[#D4AF37]" />
+            <span>Invitación Especial · Padrinos de Matrimonio</span>
+          </div>
+        )}
+
         {/* Couple Names */}
         <h1 className="relative top-6 sm:top-3 whitespace-nowrap font-serif-display text-[2.65rem] sm:text-6xl md:text-7xl font-bold text-[#111111] tracking-tight mb-2">
           Bárbara & Daniel

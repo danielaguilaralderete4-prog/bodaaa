@@ -79,7 +79,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<
-    'all' | 'confirmed' | 'pending' | 'declined'
+    'all' | 'confirmed' | 'pending' | 'declined' | 'padrinos'
   >('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
@@ -93,7 +93,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
 
   const getGuestInvitationUrl = (guest: Guest) => {
     const baseUrl = window.location.origin + window.location.pathname;
-    return `${baseUrl}?invitado=${encodeURIComponent(guest.nombre_principal)}#rsvp`;
+    const padrinoParam = guest.es_padrino ? '&padrino=true' : '';
+    return `${baseUrl}?invitado=${encodeURIComponent(guest.nombre_principal)}${padrinoParam}#rsvp`;
   };
 
   const handleCopyLink = (guest: Guest) => {
@@ -105,7 +106,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
 
   const handleShareWhatsApp = (guest: Guest) => {
     const url = getGuestInvitationUrl(guest);
-    const text = `¡Hola ${guest.nombre_principal}! ✨ Con mucha alegría y cariño, Daniel y Bárbara queremos invitarte a nuestro Matrimonio el 12 de Diciembre de 2026. Hemos reservado ${guest.cupos_totales} ${guest.cupos_totales === 1 ? 'cupo personal' : 'cupos'} para ti / tu familia. Puedes ver todos los detalles y confirmar tu asistencia en este enlace: ${url}`;
+    const text = guest.es_padrino
+      ? `¡Hola ${guest.nombre_principal}! ✨ Con todo nuestro amor, admiración y cariño, Bárbara y Daniel queremos hacerles una petición muy especial en nuestro camino al matrimonio el 12 de Diciembre de 2026. Por favor abran este enlace exclusivo que preparamos para ustedes: ${url}`
+      : `¡Hola ${guest.nombre_principal}! ✨ Con mucha alegría y cariño, Daniel y Bárbara queremos invitarte a nuestro Matrimonio el 12 de Diciembre de 2026. Hemos reservado ${guest.cupos_totales} ${guest.cupos_totales === 1 ? 'cupo personal' : 'cupos'} para ti / tu familia. Puedes ver todos los detalles y confirmar tu asistencia en este enlace: ${url}`;
     const whatsappUrl = guest.telefono
       ? `https://wa.me/${guest.telefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(text)}`
       : `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
@@ -118,6 +121,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
   const [newCategory, setNewCategory] = useState<Guest['categoria']>('Familia Novio');
   const [newPhone, setNewPhone] = useState('');
   const [newTable, setNewTable] = useState('Por asignar');
+  const [newIsPadrino, setNewIsPadrino] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // ── Gift management state ────────────────────────────────────────────────────
@@ -154,6 +158,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
     if (filterStatus === 'confirmed') matchesStatus = g.confirmado && g.asistira === true;
     if (filterStatus === 'pending') matchesStatus = !g.confirmado;
     if (filterStatus === 'declined') matchesStatus = g.confirmado && g.asistira === false;
+    if (filterStatus === 'padrinos') matchesStatus = Boolean(g.es_padrino);
 
     // Category filter
     let matchesCat = true;
@@ -183,6 +188,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
       telefono: newPhone.trim(),
       categoria: newCategory,
       mesa_asignada: newTable.trim(),
+      es_padrino: newIsPadrino,
     });
 
     if (res.success) {
@@ -190,6 +196,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
       setNewName('');
       setNewSpots(2);
       setNewPhone('');
+      setNewIsPadrino(false);
       setFormError(null);
       setToastMessage('✅ Invitado agregado correctamente');
       setTimeout(() => setToastMessage(null), 3000);
@@ -208,6 +215,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
       categoria: editingGuest.categoria,
       telefono: editingGuest.telefono,
       mesa_asignada: editingGuest.mesa_asignada,
+      es_padrino: Boolean(editingGuest.es_padrino),
     });
 
     setEditingGuest(null);
@@ -622,6 +630,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
               >
                 No Asisten ({metrics.declinadosCount})
               </button>
+              <button
+                onClick={() => setFilterStatus('padrinos')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
+                  filterStatus === 'padrinos'
+                    ? 'bg-amber-600 text-white shadow-sm'
+                    : 'bg-amber-50 border border-amber-300 text-amber-900 hover:bg-amber-100'
+                }`}
+              >
+                <span>👑 Padrinos ({guests.filter((g) => g.es_padrino).length})</span>
+              </button>
             </div>
           </div>
 
@@ -662,7 +680,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
                   filteredGuests.map((g) => (
                     <tr
                       key={g.id}
-                      className="hover:bg-[#F7F3E9] transition-colors group"
+                      className={`transition-colors group ${
+                        g.es_padrino ? 'bg-amber-50/40 hover:bg-amber-50/70' : 'hover:bg-[#F7F3E9]'
+                      }`}
                     >
                       {/* Code */}
                       <td className="py-3.5 px-4 font-mono font-bold text-[#5A5A40]">
@@ -671,20 +691,42 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
                         </span>
                       </td>
 
-                      {/* Name & Phone */}
+                      {/* Name & Phone & Padrino Toggle */}
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-[#333333]">{g.nombre_principal}</div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-[#333333]">{g.nombre_principal}</span>
+                          {g.es_padrino && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-full shadow-xs">
+                              👑 Padrino/Madrina
+                            </span>
+                          )}
+                        </div>
                         {g.telefono && (
                           <div className="text-[11px] text-[#6B6B56] flex items-center gap-1 mt-0.5">
                             <Phone className="w-3 h-3 text-[#8D8741]" />
                             <span>{g.telefono}</span>
                           </div>
                         )}
-                        {g.mesa_asignada && (
-                          <span className="inline-block text-[10px] text-[#5A5A40] font-medium bg-[#EAE7DC] px-1.5 py-0.5 rounded mt-1 border border-[#E0D8C3]">
-                            {g.mesa_asignada}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          {g.mesa_asignada && (
+                            <span className="inline-block text-[10px] text-[#5A5A40] font-medium bg-[#EAE7DC] px-1.5 py-0.5 rounded border border-[#E0D8C3]">
+                              {g.mesa_asignada}
+                            </span>
+                          )}
+                          {/* Toggle Padrino Button */}
+                          <button
+                            type="button"
+                            onClick={() => updateGuest(g.id, { es_padrino: !g.es_padrino })}
+                            title={g.es_padrino ? 'Desmarcar rol de padrino' : 'Marcar como Padrino/Madrina'}
+                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-md border transition-all flex items-center gap-1 ${
+                              g.es_padrino
+                                ? 'bg-amber-500 text-white border-amber-600 shadow-xs hover:bg-amber-600'
+                                : 'bg-white text-gray-500 border-gray-200 hover:border-amber-400 hover:text-amber-800'
+                            }`}
+                          >
+                            <span>{g.es_padrino ? '★ Padrino Asignado' : '+ Marcar Padrino'}</span>
+                          </button>
+                        </div>
                       </td>
 
                       {/* Category */}
@@ -720,10 +762,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
                       <td className="py-3.5 px-4">
                         {g.confirmado ? (
                           g.asistira ? (
-                            <span className="inline-flex items-center gap-1 bg-[#EAE7DC] text-[#5A5A40] text-[11px] font-bold px-2.5 py-1 rounded-full border border-[#BC986A]">
-                              <CheckCircle className="w-3 h-3 text-[#8D8741]" />
-                              <span>Confirmado</span>
-                            </span>
+                            <div className="space-y-1">
+                              <span className="inline-flex items-center gap-1 bg-[#EAE7DC] text-[#5A5A40] text-[11px] font-bold px-2.5 py-1 rounded-full border border-[#BC986A]">
+                                <CheckCircle className="w-3 h-3 text-[#8D8741]" />
+                                <span>Confirmado</span>
+                              </span>
+                              {g.es_padrino && (
+                                <div className="text-[10px] font-bold">
+                                  {g.acepto_padrino === true ? (
+                                    <span className="bg-amber-100 border border-amber-300 text-amber-900 px-2 py-0.5 rounded-md inline-flex items-center gap-1">
+                                      👑 Aceptó Padrino
+                                    </span>
+                                  ) : g.acepto_padrino === false ? (
+                                    <span className="bg-gray-100 border border-gray-300 text-gray-700 px-2 py-0.5 rounded-md">
+                                      Asiste (No Padrino)
+                                    </span>
+                                  ) : (
+                                    <span className="bg-amber-50 border border-amber-200 text-amber-800 px-2 py-0.5 rounded-md">
+                                      Padrino sin definir
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           ) : (
                             <span className="inline-flex items-center gap-1 bg-[#EAE7DC] text-[#BC986A] text-[11px] font-bold px-2.5 py-1 rounded-full border border-[#E0D8C3]">
                               <X className="w-3 h-3" />
@@ -731,10 +792,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
                             </span>
                           )
                         ) : (
-                          <span className="inline-flex items-center gap-1 bg-[#F7F3E9] text-[#6B6B56] text-[11px] font-bold px-2.5 py-1 rounded-full border border-[#E0D8C3]">
-                            <Clock className="w-3 h-3 text-[#BC986A]" />
-                            <span>Pendiente</span>
-                          </span>
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1 bg-[#F7F3E9] text-[#6B6B56] text-[11px] font-bold px-2.5 py-1 rounded-full border border-[#E0D8C3]">
+                              <Clock className="w-3 h-3 text-[#BC986A]" />
+                              <span>Pendiente</span>
+                            </span>
+                            {g.es_padrino && (
+                              <span className="block text-[10px] font-semibold text-amber-700">
+                                👑 Padrino sin responder
+                              </span>
+                            )}
+                          </div>
                         )}
                       </td>
 
@@ -1319,6 +1387,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
                 </div>
               </div>
 
+              {/* Toggle es_padrino */}
+              <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                    👑 Rol Especial: Padrino / Madrina
+                  </span>
+                  <p className="text-[11px] text-amber-700 mt-0.5">
+                    Genera enlace VIP con petición formal y apertura de sobre
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newIsPadrino}
+                    onChange={(e) => setNewIsPadrino(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                </label>
+              </div>
+
               {formError && (
                 <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl">{formError}</div>
               )}
@@ -1453,6 +1542,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
                     className="w-full bg-white border border-[#E0D8C3] rounded-xl px-3.5 py-2.5 text-sm focus:border-[#5A5A40] outline-none"
                   />
                 </div>
+              </div>
+
+              {/* Toggle es_padrino */}
+              <div className="p-3 bg-amber-50 rounded-2xl border border-amber-200 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                    👑 Rol Especial: Padrino / Madrina
+                  </span>
+                  <p className="text-[11px] text-amber-700 mt-0.5">
+                    Activa la experiencia VIP con sobre interactivo y petición formal
+                  </p>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(editingGuest.es_padrino)}
+                    onChange={(e) =>
+                      setEditingGuest({ ...editingGuest, es_padrino: e.target.checked })
+                    }
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                </label>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-[#E0D8C3]">

@@ -11,6 +11,15 @@ import { GiftItem, GiftReservation } from '../types';
 // Hosting), así que usamos la URL absoluta definida en VITE_API_BASE_URL.
 const API_BASE = 'https://bodaaa-backend.onrender.com/api/gifts';
 
+// ─── Pre-calentar backend (Render cold start) ──────────────────────────────────
+export const warmUpBackend = () => {
+  try {
+    fetch('https://bodaaa-backend.onrender.com/health', { mode: 'no-cors' }).catch(() => {});
+  } catch {
+    // Silencioso
+  }
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Genera un ID único para una nueva orden */
@@ -25,12 +34,6 @@ interface GiftContextValue {
   saveGift: (gift: Omit<GiftItem, 'id'>) => Promise<void>;
   updateGift: (id: string, updates: Partial<GiftItem>) => Promise<void>;
   deleteGift: (id: string) => Promise<void>;
-  /**
-   * Inicia el flujo de pago:
-   * 1. Llama al backend para crear la preference en MP
-   * 2. Devuelve la URL de pago (init_point o sandbox_init_point)
-   * El invitado es redirigido externamente → MP procesa el pago → webhook actualiza Firebase.
-   */
   initiateGiftPayment: (payload: {
     guestName: string;
     email: string;
@@ -39,9 +42,9 @@ interface GiftContextValue {
     items: Array<{ giftId: string; giftName: string; quantity: number; amount: number }>;
     totalAmount: number;
   }) => Promise<{ checkoutUrl: string; orderId: string }>;
-  /** Consulta el estado de una orden al volver de MP */
   fetchOrderStatus: (orderId: string) => Promise<GiftReservation | null>;
   giftReservations: GiftReservation[];
+  warmUpBackend: () => void;
 }
 
 const GiftContext = createContext<GiftContextValue | undefined>(undefined);
@@ -53,6 +56,9 @@ export const GiftProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Despertar el backend en Render inmediatamente de forma silenciosa
+    warmUpBackend();
+
     const loadFallbackCatalog = () => {
       setGiftItems(INITIAL_GIFT_ITEMS);
       setIsLoading(false);
@@ -219,6 +225,7 @@ export const GiftProvider: React.FC<{ children: React.ReactNode }> = ({ children
       initiateGiftPayment,
       fetchOrderStatus,
       giftReservations,
+      warmUpBackend,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [giftItems, isLoading, giftReservations]

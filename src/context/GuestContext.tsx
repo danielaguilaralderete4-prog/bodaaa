@@ -21,7 +21,12 @@ interface GuestContextType {
       cupos_confirmados: number;
       asistentes_nombres: string[];
       mensaje_novios?: string;
+      acepto_padrino?: boolean | null;
     }
+  ) => Promise<{ success: boolean; message: string; guest?: Guest }>;
+  responderPadrino: (
+    guestId: string,
+    acepta: boolean
   ) => Promise<{ success: boolean; message: string; guest?: Guest }>;
   submitDirectRSVP: (data: {
     nombre_principal: string;
@@ -42,12 +47,20 @@ interface GuestContextType {
 }
 
 const GuestContext = createContext<GuestContextType | undefined>(undefined);
-type GuestDirectoryEntry = Pick<Guest, 'codigo_invitacion' | 'nombre_principal' | 'cupos_totales'>;
+type GuestDirectoryEntry = Pick<
+  Guest,
+  'codigo_invitacion' | 'nombre_principal' | 'cupos_totales' | 'es_padrino' | 'acepto_padrino' | 'confirmado' | 'asistira' | 'cupos_confirmados'
+>;
 
 const toDirectoryEntry = (guest: Guest): GuestDirectoryEntry => ({
   codigo_invitacion: guest.codigo_invitacion,
   nombre_principal: guest.nombre_principal,
   cupos_totales: guest.cupos_totales,
+  es_padrino: Boolean(guest.es_padrino),
+  acepto_padrino: guest.acepto_padrino ?? null,
+  confirmado: Boolean(guest.confirmado),
+  asistira: guest.asistira ?? null,
+  cupos_confirmados: guest.cupos_confirmados ?? 0,
 });
 
 export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -259,6 +272,7 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       cupos_confirmados: number;
       asistentes_nombres: string[];
       mensaje_novios?: string;
+      acepto_padrino?: boolean | null;
     }
   ) => {
     const targetGuest = guests.find((g) => g.id === guestId);
@@ -280,6 +294,14 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       cupos_confirmados: data.asistira ? data.cupos_confirmados : 0,
       asistentes_nombres: data.asistira ? data.asistentes_nombres : [],
       mensaje_novios: data.mensaje_novios || '',
+      acepto_padrino:
+        data.acepto_padrino !== undefined
+          ? data.acepto_padrino
+          : targetGuest.acepto_padrino !== undefined
+          ? targetGuest.acepto_padrino
+          : targetGuest.es_padrino && data.asistira
+          ? true
+          : null,
       fecha_confirmacion: new Date().toISOString(),
     };
 
@@ -290,6 +312,7 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       cupos_confirmados: data.asistira ? data.cupos_confirmados : 0,
       asistentes_nombres: data.asistira ? data.asistentes_nombres : [],
       mensaje_novios: data.mensaje_novios || '',
+      acepto_padrino: updatedGuest.acepto_padrino ?? null,
       fecha_confirmacion: updatedGuest.fecha_confirmacion,
     });
 
@@ -299,10 +322,32 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return {
       success: true,
       message: data.asistira
-        ? `¡Gracias por confirmar! Hemos reservado ${data.cupos_confirmados} cupo(s) para su grupo.`
+        ? updatedGuest.acepto_padrino
+          ? `¡Es un inmenso honor tenerlos como nuestros padrinos! Hemos reservado sus ${data.cupos_confirmados} cupos de honor.`
+          : `¡Gracias por confirmar! Hemos reservado ${data.cupos_confirmados} cupo(s) para su grupo.`
         : 'Hemos recibido tu respuesta. Lamentamos que no puedas acompañarnos, ¡gracias por avisarnos!',
       guest: updatedGuest,
     };
+  };
+
+  const responderPadrino = async (guestId: string, acepta: boolean) => {
+    const targetGuest = guests.find((g) => g.id === guestId);
+    if (!targetGuest) {
+      return { success: false, message: 'Invitación no encontrada.' };
+    }
+
+    return submitRSVP(guestId, {
+      asistira: true,
+      cupos_confirmados: targetGuest.cupos_totales,
+      asistentes_nombres:
+        targetGuest.asistentes_nombres && targetGuest.asistentes_nombres.length > 0
+          ? targetGuest.asistentes_nombres
+          : [targetGuest.nombre_principal],
+      mensaje_novios: acepta
+        ? '¡Aceptamos con inmenso amor y honor ser sus padrinos de matrimonio!'
+        : 'Asistiremos con alegría como invitados.',
+      acepto_padrino: acepta,
+    });
   };
 
   const addGuest = async (newGuestData: Omit<Guest, 'id'>) => {
@@ -319,6 +364,8 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       cupos_confirmados: 0,
       asistira: null,
       asistentes_nombres: [],
+      es_padrino: Boolean(newGuestData.es_padrino),
+      acepto_padrino: null,
     };
 
     await update(ref(realtimeDb), {
@@ -370,6 +417,7 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       cupos_confirmados: 0,
       asistentes_nombres: [],
       mensaje_novios: '',
+      acepto_padrino: null,
     };
 
     await update(ref(realtimeDb), {
@@ -401,6 +449,8 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       'Código Invitación',
       'Nombre Principal / Familia',
       'Categoría',
+      'Es Padrino',
+      'Aceptó Rol Padrino',
       'Cupos Totales',
       'Estado RSVP',
       'Asiste',
@@ -417,6 +467,8 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       g.codigo_invitacion,
       `"${(g.nombre_principal || '').replace(/"/g, '""')}"`,
       `"${(g.categoria || 'General').replace(/"/g, '""')}"`,
+      g.es_padrino ? 'SÍ' : 'NO',
+      g.acepto_padrino === true ? 'ACEPTÓ' : g.acepto_padrino === false ? 'DECLINÓ' : 'PENDIENTE',
       g.cupos_totales,
       g.confirmado ? 'Respondido' : 'Pendiente',
       g.asistira === true ? 'SÍ' : g.asistira === false ? 'NO' : 'Pendiente',
@@ -455,6 +507,7 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         findGuestByName,
         searchGuests,
         submitRSVP,
+        responderPadrino,
         submitDirectRSVP,
         addGuest,
         updateGuest,

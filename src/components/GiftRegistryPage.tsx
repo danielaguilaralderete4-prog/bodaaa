@@ -223,7 +223,7 @@ const PaymentResultPage: React.FC<{
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export const GiftRegistryPage: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
-  const { giftItems, isLoading, initiateGiftPayment } = useGiftContext();
+  const { giftItems, isLoading, initiateGiftPayment, warmUpBackend } = useGiftContext();
 
   // URL params para resultado de pago
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>(null);
@@ -239,14 +239,22 @@ export const GiftRegistryPage: React.FC<{ onClose?: () => void }> = ({ onClose }
     }
   }, []);
 
-  // Scroll to top when component mounts
+  // Pre-calentar backend al entrar y scroll al inicio
   useEffect(() => {
+    warmUpBackend();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+  }, [warmUpBackend]);
 
   // Cart state
   const [cart, setCart] = useState<Record<string, number>>({});
   const [showCart, setShowCart] = useState(false);
+
+  // Asegurar que el backend esté despierto al abrir el carrito
+  useEffect(() => {
+    if (showCart) {
+      warmUpBackend();
+    }
+  }, [showCart, warmUpBackend]);
 
   // Form — solo Nombre y Mensaje a gusto del invitado
   const [form, setForm] = useState({ guestName: '', message: '' });
@@ -662,7 +670,7 @@ export const GiftRegistryPage: React.FC<{ onClose?: () => void }> = ({ onClose }
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Preparando pago…
+                    Conectando con Mercado Pago…
                   </>
                 ) : (
                   <>
@@ -671,6 +679,11 @@ export const GiftRegistryPage: React.FC<{ onClose?: () => void }> = ({ onClose }
                   </>
                 )}
               </button>
+              {isSubmitting && (
+                <p className="mt-2 text-center text-xs text-[#536078] animate-pulse font-medium">
+                  Abriendo pasarela de pago seguro, un momento por favor…
+                </p>
+              )}
             </form>
           </div>
         )}

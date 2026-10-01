@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useGuests } from '../context/GuestContext';
 import { Guest } from '../types';
 import { WEDDING_DETAILS } from '../data/weddingInfo';
+import { PadrinosSpecialRoleSection } from './PadrinosSpecialRoleSection';
 import {
   Mail,
   CheckCircle,
@@ -17,6 +18,7 @@ import {
   UserCheck,
   AlertCircle,
   X,
+  Crown,
 } from 'lucide-react';
 import { Toast } from './Toast';
 
@@ -82,23 +84,19 @@ export const RSVPSection: React.FC = () => {
         if (guest.asistentes_nombres && guest.asistentes_nombres.length > 0) {
           setAttendeeNames(guest.asistentes_nombres);
         } else {
-          setAttendeeNames([guest.nombre_principal]);
+          setAttendeeNames(Array(Math.min(guest.cupos_confirmados, guest.cupos_totales)).fill(''));
         }
       } else {
         setGuestCount(Math.min(guest.cupos_totales, 1));
-        setAttendeeNames([guest.nombre_principal]);
+        setAttendeeNames(['']);
       }
       if (guest.mensaje_novios) setLoveNote(guest.mensaje_novios);
     } else {
       setAlreadyConfirmedAlert(false);
       setAttending(true);
-      // Default to their maximum assigned spots
+      // Default to their maximum assigned spots with empty fields
       setGuestCount(guest.cupos_totales);
-      const initialNames = [guest.nombre_principal];
-      while (initialNames.length < guest.cupos_totales) {
-        initialNames.push('');
-      }
-      setAttendeeNames(initialNames);
+      setAttendeeNames(Array(guest.cupos_totales).fill(''));
       setLoveNote(guest.mensaje_novios || '');
     }
   };
@@ -135,9 +133,6 @@ export const RSVPSection: React.FC = () => {
     setGuestCount(cappedCount);
     setAttendeeNames((prev) => {
       const next = [...prev];
-      if (next.length === 0 && selectedGuest) {
-        next.push(selectedGuest.nombre_principal);
-      }
       while (next.length < cappedCount) {
         next.push('');
       }
@@ -165,12 +160,7 @@ export const RSVPSection: React.FC = () => {
 
     const finalAttendees = attending
       ? attendeeNames
-          .map((name, i) => {
-            if (i === 0 && (!name || !name.trim())) {
-              return selectedGuest.nombre_principal;
-            }
-            return name.trim();
-          })
+          .map((name) => name.trim())
           .filter((n) => n.length > 0)
       : [];
 
@@ -369,11 +359,20 @@ export const RSVPSection: React.FC = () => {
                               key={g.id}
                               type="button"
                               onClick={() => handleSelectSuggestion(g)}
-                              className="w-full text-left px-4 py-3 text-xs text-[#333333] hover:bg-[#EAE7DC] flex justify-between items-center transition-colors border-b border-[#E0D8C3]/40 last:border-0"
+                              className={`w-full text-left px-4 py-3 text-xs text-[#333333] flex justify-between items-center transition-colors border-b border-[#E0D8C3]/40 last:border-0 ${
+                                g.es_padrino ? 'bg-amber-50 hover:bg-amber-100' : 'hover:bg-[#EAE7DC]'
+                              }`}
                             >
-                              <span className="font-bold text-sm text-[#333333]">
-                                {g.nombre_principal}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm text-[#333333]">
+                                  {g.nombre_principal}
+                                </span>
+                                {g.es_padrino && (
+                                  <span className="text-[10px] font-bold text-amber-900 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">
+                                    👑 Padrino
+                                  </span>
+                                )}
+                              </div>
                               <span className="text-xs font-semibold text-[#5A5A40] bg-[#EAE7DC] px-3 py-1 rounded-full border border-[#E0D8C3]">
                                 {g.cupos_totales} {g.cupos_totales === 1 ? 'cupo' : 'cupos'}
                               </span>
@@ -423,6 +422,25 @@ export const RSVPSection: React.FC = () => {
                   </div>
                 )}
 
+                {/* Special Padrino Badge in RSVP */}
+                {selectedGuest.es_padrino && (
+                  <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-50 via-[#FFFDF7] to-amber-50 border-2 border-[#D4AF37] flex items-start gap-3.5 shadow-sm">
+                    <div className="w-10 h-10 rounded-xl bg-[#18243D] text-[#D4AF37] flex items-center justify-center shrink-0 shadow-xs">
+                      <Crown className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-[#18243D] flex items-center gap-1.5 font-serif-display">
+                        👑 Invitación de Honor: Padrinos de Matrimonio
+                      </p>
+                      <p className="text-xs text-[#5A5A40] mt-0.5 leading-relaxed">
+                        {selectedGuest.acepto_padrino === true
+                          ? '¡Su confirmación como Padrinos y asistencia ya está registrada! A continuación pueden actualizar los nombres de los asistentes o dejarnos un mensaje especial.'
+                          : 'Tienen un lugar de honor reservado como padrinos en nuestro matrimonio.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Personalized Welcome Banner */}
                 <div className="p-4 sm:p-5 rounded-2xl bg-[#EAE7DC] border-2 border-[#BC986A]/60 flex items-start justify-between gap-3 shadow-inner">
                   <div className="flex items-start gap-3">
@@ -431,7 +449,7 @@ export const RSVPSection: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-[10px] uppercase tracking-wider font-bold text-[#8D8741] block">
-                        Invitación Confirmada para:
+                        Su Invitación:
                       </span>
                       <h4 className="font-serif-display text-lg font-bold text-[#333333]">
                         {selectedGuest.nombre_principal}
@@ -536,7 +554,7 @@ export const RSVPSection: React.FC = () => {
                       {selectedGuest.cupos_totales === 1 ? (
                         <div className="p-3.5 rounded-xl bg-[#F7F3E9] border border-[#E0D8C3] text-xs text-[#5A5A40] font-semibold flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-[#8D8741]" />
-                          <span>Invitación Individual: 1 cupo confirmado para {selectedGuest.nombre_principal}.</span>
+                          <span>Invitación Individual: 1 cupo reservado para {selectedGuest.nombre_principal}.</span>
                         </div>
                       ) : (
                         <div
@@ -575,18 +593,12 @@ export const RSVPSection: React.FC = () => {
                           <input
                             type="text"
                             required
-                            value={
-                              attendeeNames[idx] !== undefined
-                                ? attendeeNames[idx]
-                                : idx === 0
-                                ? selectedGuest.nombre_principal
-                                : ''
-                            }
+                            value={attendeeNames[idx] || ''}
                             onChange={(e) => handleAttendeeNameChange(idx, e.target.value)}
                             placeholder={
-                              idx === 0
-                                ? `Titular: ${selectedGuest.nombre_principal}`
-                                : `Nombre y Apellido del Acompañante ${idx + 1}`
+                              guestCount === 1
+                                ? 'Nombre y Apellido'
+                                : `Nombre y Apellido (Persona ${idx + 1})`
                             }
                             className="w-full bg-white border border-[#E0D8C3] focus:border-[#5A5A40] focus:ring-1 focus:ring-[#5A5A40] rounded-xl px-4 py-2.5 text-sm text-[#333333] outline-none"
                           />

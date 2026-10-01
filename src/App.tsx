@@ -21,6 +21,8 @@ import defaultWeddingSong from './assets/audio/caminar-de-tu-mano.mp3';
 import {auth} from './lib/firebase';
 import {onAuthStateChanged, signOut} from 'firebase/auth';
 import { GiftProvider } from './context/GiftContext';
+import { PadrinosVIPExperience } from './components/PadrinosVIPExperience';
+import { PadrinosSpecialRoleSection } from './components/PadrinosSpecialRoleSection';
 
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -31,6 +33,8 @@ export default function App() {
   const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
   const [musicStateBeforeAdmin, setMusicStateBeforeAdmin] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isPadrinoVIP, setIsPadrinoVIP] = useState(false);
+  const [isPadrinoUnlocked, setIsPadrinoUnlocked] = useState(false);
 
   // Load music preference from localStorage
   useEffect(() => {
@@ -97,6 +101,17 @@ export default function App() {
     });
     return unsubscribe;
   }, []);
+
+  // Detect padrino parameter in URL
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const isPadrino = params.get('padrino') === 'true' || params.get('padrino') === '1';
+      setIsPadrinoVIP(isPadrino && !isPadrinoUnlocked);
+    } catch (e) {
+      console.error('Error detecting padrino parameter', e);
+    }
+  }, [isPadrinoUnlocked]);
 
   const toggleMusic = () => {
     setIsPlayingMusic((prev) => !prev);
@@ -171,7 +186,17 @@ export default function App() {
                 audioBlobUrl={audioBlobUrl}
               />
 
-              <Header isAdminOpen={isAdminOpen} onToggleAdmin={handleAdminToggle} />
+              <Header 
+                isAdminOpen={isAdminOpen} 
+                onToggleAdmin={handleAdminToggle}
+                isPadrinoVIP={isPadrinoVIP && !isPadrinoUnlocked}
+              />
+
+              {/* Padrino VIP Experience Overlay */}
+              <PadrinosVIPExperience 
+                onUnlockInvitation={() => setIsPadrinoUnlocked(true)}
+                isUnlocked={isPadrinoUnlocked}
+              />
 
               <main className="w-full pb-24 md:pb-0">
                 <HeroSection />
@@ -180,6 +205,7 @@ export default function App() {
                 <ProtocolSection />
                 <GiftRegistrySection onOpenGiftPage={openGiftPage} />
                 <RSVPSection />
+                {isPadrinoUnlocked && <PadrinosSpecialRoleSection />}
                 <MusicRequestsSection />
               </main>
 

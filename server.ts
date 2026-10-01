@@ -545,25 +545,21 @@ app.post('/api/gifts/create-preference', preferenceRateLimiter, async (req: Requ
       return;
     }
 
-    // ── Validar cupos disponibles (cache local para respuesta rápida) ──────
-    // En lugar de esperar a Firebase para cada validación, hacemos una lectura
-    // rápida y procesamos la validación de forma optimista. Si hay un conflicto
-    // de cupos, el webhook lo rechazará.
-    let catalogSnap;
+    // ── Validar cupos disponibles (cache local para respuesta ultra rápida) ──────
+    let catalog: Record<string, GiftItem> | null = null;
     try {
-      catalogSnap = await Promise.race([
+      const catalogSnap = await Promise.race([
         db.ref('giftCatalog').once('value'),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout de catálogo')), 3000)
+          setTimeout(() => reject(new Error('Timeout')), 400)
         ),
       ]);
+      catalog = catalogSnap?.val() as Record<string, GiftItem> | null;
     } catch {
-      // Si no podemos validar rápidamente, permitimos la orden de todas formas.
-      // El webhook hará la validación definitiva.
-      catalogSnap = null;
+      // Si Firebase tarda más de 400ms o no está disponible, no frenamos al usuario.
+      // La validación definitiva de cupos la procesa el webhook de Mercado Pago.
+      catalog = null;
     }
-
-    const catalog = catalogSnap?.val() as Record<string, GiftItem> | null;
 
     if (catalog) {
       // Validar contra el catálogo si lo logramos leer rápido

@@ -1,11 +1,16 @@
 import React from 'react';
 import { Gift, ExternalLink, Sparkles } from 'lucide-react';
+import { warmUpBackend } from '../context/GiftContext';
 
 interface GiftRegistrySectionProps {
   onOpenGiftPage: () => void;
 }
 
 export const GiftRegistrySection: React.FC<GiftRegistrySectionProps> = ({ onOpenGiftPage }) => {
+  const handleOpen = () => {
+    warmUpBackend();
+    onOpenGiftPage();
+  };
   return (
     <section id="gifts" className="py-20 sm:py-24 px-4 sm:px-6 bg-[#FBF8F1] border-y border-[#D8C29A]">
       <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
@@ -43,7 +48,8 @@ export const GiftRegistrySection: React.FC<GiftRegistrySectionProps> = ({ onOpen
 
           <button
             type="button"
-            onClick={onOpenGiftPage}
+            onClick={handleOpen}
+            onMouseEnter={warmUpBackend}
             className="inline-flex items-center justify-center gap-2.5 w-full py-4 px-8 rounded-full bg-[#18243D] text-white hover:bg-[#283653] transition-all text-xs uppercase tracking-[0.15em] font-semibold shadow-md hover:shadow-lg group/btn"
           >
             <span>Explorar Lista de Regalos</span>
