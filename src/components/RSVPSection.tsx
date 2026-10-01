@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useGuests } from '../context/GuestContext';
 import { Guest } from '../types';
 import { WEDDING_DETAILS } from '../data/weddingInfo';
-import { PadrinosSpecialRoleSection } from './PadrinosSpecialRoleSection';
 import {
   Mail,
   CheckCircle,
@@ -70,35 +69,17 @@ export const RSVPSection: React.FC = () => {
 
   const loadGuestIntoForm = (guest: Guest) => {
     setSelectedGuest(guest);
-    setNameInput(guest.nombre_principal);
+    setNameInput('');
     setIsTyping(false);
     setNotFoundAlert(false);
     setPhoneNumber(guest.telefono || '');
 
-    // Check if already confirmed
-    if (guest.confirmado && guest.asistira !== null) {
-      setAlreadyConfirmedAlert(true);
-      setAttending(guest.asistira);
-      if (guest.cupos_confirmados > 0) {
-        setGuestCount(Math.min(guest.cupos_confirmados, guest.cupos_totales));
-        if (guest.asistentes_nombres && guest.asistentes_nombres.length > 0) {
-          setAttendeeNames(guest.asistentes_nombres);
-        } else {
-          setAttendeeNames(Array(Math.min(guest.cupos_confirmados, guest.cupos_totales)).fill(''));
-        }
-      } else {
-        setGuestCount(Math.min(guest.cupos_totales, 1));
-        setAttendeeNames(['']);
-      }
-      if (guest.mensaje_novios) setLoveNote(guest.mensaje_novios);
-    } else {
-      setAlreadyConfirmedAlert(false);
-      setAttending(true);
-      // Default to their maximum assigned spots with empty fields
-      setGuestCount(guest.cupos_totales);
-      setAttendeeNames(Array(guest.cupos_totales).fill(''));
-      setLoveNote(guest.mensaje_novios || '');
-    }
+    // Reset form - no auto-fill
+    setAlreadyConfirmedAlert(false);
+    setAttending(true);
+    setGuestCount(guest.cupos_totales);
+    setAttendeeNames(Array(guest.cupos_totales).fill(''));
+    setLoveNote('');
   };
 
   // Search suggestions as user types their name
@@ -407,20 +388,6 @@ export const RSVPSection: React.FC = () => {
             ) : (
               /* STEP 2: Personalized RSVP Form (Strictly Limited to Assigned Spots) */
               <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
-                {/* Banner: Already Confirmed */}
-                {alreadyConfirmedAlert && (
-                  <div className="p-4 sm:p-5 rounded-2xl bg-blue-50 border border-blue-200 flex items-start gap-3 shadow-sm">
-                    <CheckCircle className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold text-blue-900">
-                        Ya ha confirmado su asistencia
-                      </p>
-                      <p className="text-xs text-blue-800 mt-0.5">
-                        Si necesita modificar su respuesta, comuníquese con los novios directamente.
-                      </p>
-                    </div>
-                  </div>
-                )}
 
                 {/* Special Padrino Badge in RSVP */}
                 {selectedGuest.es_padrino && (

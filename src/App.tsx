@@ -22,7 +22,6 @@ import {auth} from './lib/firebase';
 import {onAuthStateChanged, signOut} from 'firebase/auth';
 import { GiftProvider } from './context/GiftContext';
 import { PadrinosVIPExperience } from './components/PadrinosVIPExperience';
-import { PadrinosSpecialRoleSection } from './components/PadrinosSpecialRoleSection';
 
 export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
@@ -205,7 +204,6 @@ export default function App() {
                 <ProtocolSection />
                 <GiftRegistrySection onOpenGiftPage={openGiftPage} />
                 <RSVPSection />
-                {isPadrinoUnlocked && <PadrinosSpecialRoleSection />}
                 <MusicRequestsSection />
               </main>
 
