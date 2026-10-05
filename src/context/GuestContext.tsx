@@ -378,17 +378,29 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateGuest = async (id: string, updates: Partial<Guest>) => {
     const current = guests.find((guest) => guest.id === id);
-    await update(ref(realtimeDb), {
-      [`guests/${id}`]: updates,
-      ...(current
-        ? { [`guestDirectory/${id}`]: toDirectoryEntry({ ...current, ...updates }) }
-        : {}),
+    const guestUpdates: Partial<Guest> = Object.fromEntries(
+      Object.entries(updates).filter(([key, value]) => key !== 'id' && value !== undefined)
+    );
+    const databaseUpdates: Record<string, unknown> = {};
+
+    Object.entries(guestUpdates).forEach(([key, value]) => {
+      databaseUpdates[`guests/${id}/${key}`] = value;
     });
+
+    if (current) {
+      databaseUpdates[`guestDirectory/${id}`] = toDirectoryEntry({
+        ...current,
+        ...guestUpdates,
+        id,
+      });
+    }
+
+    await update(ref(realtimeDb), databaseUpdates);
 
     setGuests((prev) =>
       prev.map((g) => {
         if (g.id === id) {
-          return { ...g, ...updates };
+          return { ...g, ...guestUpdates, id: g.id };
         }
         return g;
       })

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ExternalLink, Music2, Sparkles } from 'lucide-react';
 
-const SPOTIFY_PLAYLIST_URL = 'https://open.spotify.com/playlist/5O0p3bCLI6WbehiwhOAphs?si=a0JFITffSLa3DeG4hOKzzQ&utm_source=copy-link&pt=7169f688ff3efd6dd0fbba6480464e4b&pi=B-2pwCKmTNCq-';
+const SPOTIFY_PLAYLIST_URL = 'https://open.spotify.com/playlist/5O0p3bCLI6WbehiwhOAphs?si=DVos5vVDS3WYQfrY2H4BEQ&utm_source=copy-link&pi=BW9SsT-1TC2N6&pt=7a3202075ca12662e1f0d7a303514b4d';
 const SPOTIFY_EMBED_URL = 'https://open.spotify.com/embed/playlist/5O0p3bCLI6WbehiwhOAphs?utm_source=generator&theme=0';
 
 export const MusicRequestsSection: React.FC = () => {
