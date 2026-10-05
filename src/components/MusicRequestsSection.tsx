@@ -1,10 +1,30 @@
 import React from 'react';
 import { ExternalLink, Music2, Sparkles } from 'lucide-react';
+import { onValue, ref } from 'firebase/database';
+import { useEffect, useState } from 'react';
+import { realtimeDb } from '../lib/firebase';
 
-const SPOTIFY_PLAYLIST_URL = 'https://open.spotify.com/playlist/5O0p3bCLI6WbehiwhOAphs?si=DVos5vVDS3WYQfrY2H4BEQ&utm_source=copy-link&pi=BW9SsT-1TC2N6&pt=7a3202075ca12662e1f0d7a303514b4d';
-const SPOTIFY_EMBED_URL = 'https://open.spotify.com/embed/playlist/5O0p3bCLI6WbehiwhOAphs?utm_source=generator&theme=0';
+export const DEFAULT_SPOTIFY_PLAYLIST_URL = 'https://open.spotify.com/playlist/5O0p3bCLI6WbehiwhOAphs?si=DVos5vVDS3WYQfrY2H4BEQ&utm_source=copy-link&pi=BW9SsT-1TC2N6&pt=7a3202075ca12662e1f0d7a303514b4d';
 
 export const MusicRequestsSection: React.FC = () => {
+  const [playlistUrl, setPlaylistUrl] = useState(DEFAULT_SPOTIFY_PLAYLIST_URL);
+
+  useEffect(() => {
+    return onValue(
+      ref(realtimeDb, 'musicSettings/playlistUrl'),
+      (snapshot) => {
+        const value = snapshot.val();
+        if (typeof value === 'string' && value.trim()) setPlaylistUrl(value);
+      },
+      (error) => {
+        console.error('No se pudo cargar el enlace de Spotify:', error);
+      }
+    );
+  }, []);
+
+  const playlistId = new URL(playlistUrl).pathname.split('/').filter(Boolean).pop();
+  const embedUrl = `https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator&theme=0`;
+
   return (
     <section id="music" className="px-4 py-20 sm:px-6 sm:py-24">
       <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[2rem] border border-[#D8C29A] bg-[#FBF8F1] px-6 py-12 text-center shadow-sm sm:px-12">
@@ -24,7 +44,7 @@ export const MusicRequestsSection: React.FC = () => {
             este día agregando sus canciones favoritas a nuestra playlist.
           </p>
           <a
-            href={SPOTIFY_PLAYLIST_URL}
+            href={playlistUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-[#18243D] px-7 py-3.5 text-xs font-semibold uppercase tracking-[0.15em] text-white shadow-md transition-all hover:bg-[#283653] hover:shadow-lg"
@@ -38,7 +58,7 @@ export const MusicRequestsSection: React.FC = () => {
           <div className="mt-8 w-full max-w-[540px] overflow-hidden rounded-2xl border border-[#D8C29A]/70 shadow-md">
             <iframe
               title="Playlist colaborativa de Spotify"
-              src={SPOTIFY_EMBED_URL}
+              src={embedUrl}
               width="100%"
               height="152"
               loading="lazy"

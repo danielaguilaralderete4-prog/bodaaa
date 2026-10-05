@@ -29,6 +29,10 @@
       "$requestId": {
         ".write": "!data.exists() || auth != null"
       }
+    },
+    "musicSettings": {
+      ".read": true,
+      ".write": "auth != null"
     }
   }
 }

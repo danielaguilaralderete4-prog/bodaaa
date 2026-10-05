@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGuests } from '../context/GuestContext';
 import { useGiftContext } from '../context/GiftContext';
 import { Toast } from './Toast';
+import { SpotifySettingsPanel } from './SpotifySettingsPanel';
 import { Guest, GiftItem, GiftReservation } from '../types';
 import {
   Users,
@@ -42,6 +43,7 @@ import {
   ChevronUp,
   Volume2,
   VolumeX,
+  Music2,
 } from 'lucide-react';
 
 const formatCLP = (v: number) =>
@@ -75,7 +77,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
   } = useGiftContext();
 
   // ── Active tab ──────────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<'guests' | 'gifts'>('guests');
+  const [activeTab, setActiveTab] = useState<'guests' | 'gifts' | 'settings'>('guests');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<
@@ -475,6 +477,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
                 {giftReservations.filter(r => r.status === 'paid').length}
               </span>
             )}
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all ${
+              activeTab === 'settings'
+                ? 'bg-[#5A5A40] text-white shadow-sm'
+                : 'text-[#6B6B56] hover:bg-[#EAE7DC]'
+            }`}
+          >
+            <Music2 className="w-3.5 h-3.5" />
+            Configuración
           </button>
         </div>
       </div>
@@ -1291,6 +1304,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
             </div>
           </div>
         )}
+        {activeTab === 'settings' && <SpotifySettingsPanel />}
       </div>
 
       {/* MODAL: ADD GUEST */}
