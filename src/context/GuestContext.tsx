@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
-import { onValue, push, ref, remove, set, update } from 'firebase/database';
+import { get, onValue, push, ref, set, update } from 'firebase/database';
 import { auth, realtimeDb } from '../lib/firebase';
 import { Guest, AdminMetrics } from '../types';
 import { INITIAL_GUESTS } from '../data/initialGuests';
@@ -408,12 +408,24 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return { success: true, message: 'Invitado actualizado.' };
   };
 
+  /** Las respuestas se guardan con claves push(), no con el id del invitado,
+   * así que hay que buscarlas por su campo guest_id para poder borrarlas. */
+  const getResponseDeletionPaths = async (guestId: string): Promise<Record<string, null>> => {
+    const snapshot = await get(ref(realtimeDb, 'guestResponses'));
+    const raw = (snapshot.val() as Record<string, { guest_id?: string } | null> | null) || {};
+    const paths: Record<string, null> = {};
+    Object.entries(raw).forEach(([key, response]) => {
+      if (response?.guest_id === guestId) paths[`guestResponses/${key}`] = null;
+    });
+    return paths;
+  };
+
   const deleteGuest = async (id: string): Promise<void> => {
     try {
       await update(ref(realtimeDb), {
+        ...(await getResponseDeletionPaths(id)),
         [`guests/${id}`]: null,
         [`guestDirectory/${id}`]: null,
-        [`guestResponses/${id}`]: null,
       });
       setGuests((prev) => prev.filter((g) => g.id !== id));
     } catch (error) {
@@ -423,6 +435,7 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const resetRSVP = async (id: string) => {
+    const current = guests.find((g) => g.id === id);
     const updates: Partial<Guest> = {
       confirmado: false,
       asistira: null,
@@ -432,10 +445,19 @@ export const GuestProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       acepto_padrino: null,
     };
 
-    await update(ref(realtimeDb), {
-      [`guests/${id}`]: updates,
-      [`guestResponses/${id}`]: null,
+    // Actualiza campo por campo para no sobrescribir nombre, cupos, mesa, etc.
+    const databaseUpdates: Record<string, unknown> = {
+      ...(await getResponseDeletionPaths(id)),
+      [`guests/${id}/fecha_confirmacion`]: null,
+    };
+    Object.entries(updates).forEach(([key, value]) => {
+      databaseUpdates[`guests/${id}/${key}`] = value;
     });
+    if (current) {
+      databaseUpdates[`guestDirectory/${id}`] = toDirectoryEntry({ ...current, ...updates } as Guest);
+    }
+
+    await update(ref(realtimeDb), databaseUpdates);
 
     setGuests((prev) =>
       prev.map((g) => (g.id === id ? { ...g, ...updates, fecha_confirmacion: undefined } : g))

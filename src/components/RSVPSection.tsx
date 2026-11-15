@@ -202,8 +202,7 @@ export const RSVPSection: React.FC = () => {
           Confirmar Asistencia
         </h2>
         <p className="text-base text-[#6B6B56] leading-relaxed">
-          Para nosotros es fundamental contar con su presencia. Por favor confirma antes del{' '}
-          <strong className="text-[#5A5A40] font-semibold">{WEDDING_DETAILS.rsvpDeadline}</strong>{' '}
+          Para nosotros es fundamental contar con su presencia. Por favor confirma tu asistencia
           para reservar sus cupos en nuestro gran día.
         </p>
         <div className="w-24 h-[1.5px] bg-gradient-to-r from-transparent via-[#BC986A] to-transparent mt-6" />

@@ -2,37 +2,36 @@
   "rules": {
     "guestDirectory": {
       ".read": true,
-      ".write": "auth != null"
+      ".write": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')"
     },
     "guests": {
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')",
+      ".write": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')"
     },
     "guestResponses": {
-      ".read": "auth != null",
+      ".read": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')",
+      ".write": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')",
       "$responseId": {
-        ".write": "!data.exists()"
+        ".write": "!data.exists() && newData.exists()"
       }
     },
     "giftCatalog": {
       ".read": true,
-      ".write": "auth != null"
+      ".write": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')"
     },
     "giftOrders": {
-      ".read": "auth != null",
-      "$orderId": {
-        ".write": "auth != null"
-      }
+      ".read": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')",
+      ".write": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')"
     },
     "musicRequests": {
       ".read": true,
       "$requestId": {
-        ".write": "!data.exists() || auth != null"
+        ".write": "!data.exists() || (auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com'))"
       }
     },
     "musicSettings": {
       ".read": true,
-      ".write": "auth != null"
+      ".write": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')"
     }
   }
 }

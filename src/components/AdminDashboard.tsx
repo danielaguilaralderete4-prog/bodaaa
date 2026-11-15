@@ -64,7 +64,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
     updateGuest,
     deleteGuest,
     resetRSVP,
-    resetAllToDefault,
     exportGuestListCSV,
   } = useGuests();
 
@@ -232,21 +231,39 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
       return;
     }
 
-    if (file.size > 4 * 1024 * 1024) {
-      setGiftError('La imagen debe pesar menos de 4 MB para que se vea bien en la invitación.');
+    if (file.size > 20 * 1024 * 1024) {
+      setGiftError('La imagen es demasiado grande (máximo 20 MB).');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = typeof reader.result === 'string' ? reader.result : '';
+    // La imagen se guarda en la base de datos pública y la descarga cada
+    // invitado, así que se reduce a máx. 1000 px y se comprime a JPEG (~100 KB).
+    const objectUrl = URL.createObjectURL(file);
+    const img = new window.Image();
+    img.onload = () => {
+      const MAX = 1000;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext('2d');
+      URL.revokeObjectURL(objectUrl);
+      if (!ctx) {
+        setGiftError('No se pudo procesar la imagen. Intenta con otra.');
+        return;
+      }
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const result = canvas.toDataURL('image/jpeg', 0.8);
       setGiftForm((current) => ({ ...current, imageUrl: result }));
       setGiftError(null);
     };
-    reader.onerror = () => {
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
       setGiftError('No se pudo leer la imagen seleccionada. Intenta nuevamente.');
     };
-    reader.readAsDataURL(file);
+    img.src = objectUrl;
   };
 
   const handleGiftFormSubmit = async (e: React.FormEvent) => {
@@ -935,20 +952,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onClose, isPlayi
               <strong>{guests.length}</strong> invitaciones registradas.
             </span>
           </div>
-          <button
-            onClick={() => {
-              if (
-                confirm(
-                  '¿Deseas restaurar la base de datos de invitados a los valores iniciales de prueba?'
-                )
-              ) {
-                resetAllToDefault();
-              }
-            }}
-            className="text-xs text-[#5A5A40] hover:underline font-semibold"
-          >
-            Restaurar Base de Datos Inicial de Prueba
-          </button>
         </div>
           </div>
         )}

@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
             El Evento
           </a>
           <a
-            href="#suggestions"
+            href="#protocol"
             className="text-xs uppercase tracking-[0.2em] font-medium text-[#536078] hover:text-[#18243D] transition-colors whitespace-nowrap"
           >
             Sugerencias
