@@ -29,6 +29,10 @@
         ".write": "!data.exists() || (auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com'))"
       }
     },
+    "seating": {
+      ".read": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')",
+      ".write": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')"
+    },
     "musicSettings": {
       ".read": true,
       ".write": "auth != null && (auth.token.email == 'danielaguilaralderete4@gmail.com' || auth.token.email == 'barbaracarolinam10@gmail.com')"
